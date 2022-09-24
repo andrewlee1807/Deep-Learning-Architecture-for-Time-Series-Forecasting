@@ -1,6 +1,9 @@
 #  Copyright (c) 2022 Andrew
 #  Email: andrewlee1807@gmail.com
 
+from sklearn.model_selection import train_test_split
+
+
 class TimeSeriesGenerator:
     """
     This class only support to prepare training (backup to TSF class)
@@ -121,19 +124,30 @@ class TimeSeriesGenerator:
         return X_data, y_label
 
 
-from data import *
+from datasets import *
 
 
 def get_all_data_supported():
-    pass
+    return list(CONFIG_PATH.keys())
+
 
 class Dataset:
-    def __init__(self, dataset_name):
-        self.dataset_name = dataset_name
-        self.dataset = None
+    """
+    Dataset class hold all the dataset via dataset name
+    :function:
+    - Load dataset
+    """
 
-    def load_data(self):
-        if dataset_name == "CNU":
-            self.dataset = CNU()
-        elif dataset_name == "ETH":
-            pass
+    def __init__(self, dataset_name):
+        dataset_name = dataset_name.upper()
+        if dataset_name not in get_all_data_supported():
+            raise f"Dataset name {dataset_name} isn't supported"
+        self.dataset_name = dataset_name
+        # DataLoader
+        self.dataloader = self.__load_data()
+
+    def __load_data(self):
+        if self.dataset_name == cnu_str:
+            return CNU()
+        elif self.dataset_name == comed_str:
+            return COMED()
