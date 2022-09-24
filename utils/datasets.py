@@ -1,0 +1,45 @@
+#  Copyright (c) 2022 Andrew
+#  Email: andrewlee1807@gmail.com
+import numpy as np
+import pandas as pd
+
+# Dataset path
+CONFIG_PATH = {
+    "CNU": "https://raw.githubusercontent.com/andrewlee1807/Weights/main/datasets/%EA%B3%B5%EB%8C%807%ED%98%B8%EA%B4%80_HV_02.csv",
+    "COMED": "https://raw.githubusercontent.com/andrewlee1807/Weights/main/datasets/COMED_hourly.csv"
+}
+
+
+class DataLoader:
+    def __init__(self, path_file):
+        self.raw_data = None
+        if path_file is None:
+            self.path_file = CONFIG_CNU_PATH
+        else:
+            self.path_file = path_file
+
+    def read_data_frame(self):
+        return pd.read_csv(self.data_path)
+
+    def read_a_single_sequence(self):
+        return np.loadtxt(self.path_file)
+
+
+# CNU dataset
+class CNU(DataLoader):
+    def __init__(self, path_file):
+        super(CNU, self).__init__(path_file)
+        self.read_csv()
+
+    def read_csv(self):
+        self.raw_data = np.loadtxt(self.path_file)
+
+    def export_sequences(self):
+        return self.raw_data
+
+
+# COMED_hourly
+class COMED(DataLoader):
+    def __init__(self):
+        super(COMED, self).__init__()
+        self.dataframe = self.read_data_frame()
