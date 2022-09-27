@@ -4,6 +4,16 @@
 from sklearn.model_selection import train_test_split
 
 
+def pattern(sequence, kernel_size: int, gap=7):
+    head_kernel_size = tail_kernel_size = kernel_size // 2
+    export_sequences = list()
+    for node in sequence:
+        sub_sequence = list()
+    # Padding
+
+
+
+
 class TimeSeriesGenerator:
     """
     This class only support to prepare training (backup to TSF class)
@@ -66,6 +76,10 @@ class TimeSeriesGenerator:
             return self.scaler_y.inverse_transform(y_predicted)
         return y_predicted
 
+    def re_arrange_sequence(self):
+        # self.data_train =
+        pass
+
     def normalize_data(self, standardization_type=1):
         """The mean and standard deviation should only be computed using the training data so that the models
         have no access to the values in the validation and test sets.
@@ -124,7 +138,7 @@ class TimeSeriesGenerator:
         return X_data, y_label
 
 
-from datasets import *
+from utils.datasets import *
 
 
 def get_all_data_supported():
