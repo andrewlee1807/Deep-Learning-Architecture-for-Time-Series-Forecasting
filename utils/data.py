@@ -2,16 +2,30 @@
 #  Email: andrewlee1807@gmail.com
 
 from sklearn.model_selection import train_test_split
+import numpy as np
 
 
-def pattern(sequence, kernel_size: int, gap=7):
+def pattern(sequence: np.array, kernel_size: int, gap=7):
     head_kernel_size = tail_kernel_size = kernel_size // 2
-    export_sequences = list()
-    for node in sequence:
-        sub_sequence = list()
+
     # Padding
+    padding = np.zeros(gap + tail_kernel_size)
+    new_sequence = np.concatenate([sequence, padding])
 
+    def generate_index(ix):
+        for i in range(0, head_kernel_size):  # gen index from head
+            list_ix.append(ix + i)
+        for j in range(0, tail_kernel_size):  # gen index from tail
+            list_ix.append(ix + gap + j)
 
+    list_ix = []
+    # ix_padding = len(sequence) - (gap + tail_kernel_size)
+    # align sequence
+    for node_index in range(0, len(sequence)):
+        generate_index(node_index)
+    new_sequence = new_sequence[list_ix]
+
+    return new_sequence
 
 
 class TimeSeriesGenerator:
