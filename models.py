@@ -26,26 +26,30 @@ def build_callbacks(tensorboard_name=None):
     return callbacks
 
 
-def initialize_model1(input_width, target_size, num_features):
-    model = Model1(target_size=target_size)
+def initialize_model1(config):
+    model = Model1(list_stride=config['list_stride'],
+                   list_dilation=config['list_dilation'],
+                   nb_filters=config['nb_filters'],
+                   kernel_size=config['kernel_size'],
+                   target_size=config['output_length'])
     # print model
-    input_test = Input(shape=(input_width, num_features))
+    input_test = Input(shape=(config['input_width'], config['num_features']))
     model(input_test)
     model.summary()
     # Build model
     model.compile(loss=Huber(),
-                  optimizer='adam',
-                  metrics=['mse', 'mae'])
+                  optimizer=config['optimizer'],
+                  metrics=config['metrics'])
 
     return model
 
 
-def get_model(model_name: str, input_width: int, target_size: int, num_features=1) -> object:
-    model_name = model_name.upper
-    if model_name == model1_str:
-        return initialize_model1(input_width, target_size, num_features)
-    elif model_name == model2_str:
+def get_model(model_name: str, config) -> object:
+    model_name = model_name.upper()
+    if model_name == model1_str.upper():
+        return initialize_model1(config)
+    elif model_name == model2_str.upper():
         pass
-    elif model_name == model3_str:
+    elif model_name == model3_str.upper():
         pass
     return None
