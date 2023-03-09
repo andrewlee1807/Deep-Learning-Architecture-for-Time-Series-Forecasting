@@ -130,3 +130,6 @@ dmypy.json
 
 *test*
 event*
+
+# execute files can be modified by the user
+execute*
