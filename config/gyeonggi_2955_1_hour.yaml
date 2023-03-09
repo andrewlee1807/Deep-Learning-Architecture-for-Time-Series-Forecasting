@@ -1,0 +1,12 @@
+#INITIAL SETTINGS
+kernel_size: 12
+gap: 24
+list_stride: [ 24, 1]
+list_dilation: [ 1, 1]
+nb_filters: 64
+input_width: 168
+output_length: 1 # predict 1 hour
+train_ratio: 0.9
+num_features: 1
+optimizer: "adam"
+metrics: [ 'mse', 'mae' ]
