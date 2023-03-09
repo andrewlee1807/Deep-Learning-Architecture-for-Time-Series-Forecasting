@@ -5,12 +5,12 @@ from sklearn.model_selection import train_test_split
 import numpy as np
 
 
-def pattern(sequence: np.array, kernel_size: int, gap=7):
+def pattern(datapack: np.array, kernel_size: int, gap=7):
+    # sequence.shape = [num_record, timeseries, feature] , example (1093, 24, 1)
     head_kernel_size = tail_kernel_size = kernel_size // 2
 
     # Padding
     padding = np.zeros(gap + tail_kernel_size)
-    new_sequence = np.concatenate([sequence, padding])
 
     def generate_index(ix):
         for i in range(0, head_kernel_size):  # gen index from head
@@ -18,14 +18,18 @@ def pattern(sequence: np.array, kernel_size: int, gap=7):
         for j in range(0, tail_kernel_size):  # gen index from tail
             list_ix.append(ix + gap + j)
 
-    list_ix = []
     # ix_padding = len(sequence) - (gap + tail_kernel_size)
+    new_datapack = []
     # align sequence
-    for node_index in range(0, len(sequence)):
-        generate_index(node_index)
-    new_sequence = new_sequence[list_ix]
+    for time_pattern in datapack:
+        new_sequence = np.concatenate([time_pattern, padding])
+        list_ix = []
+        for node_index in range(0, len(time_pattern)):
+            generate_index(node_index)
+        # new_sequence = new_sequence[list_ix]
+        new_datapack.append(new_sequence[list_ix])
 
-    return new_sequence
+    return np.asarray(new_datapack)
 
 
 class TimeSeriesGenerator:
@@ -36,11 +40,9 @@ class TimeSeriesGenerator:
     def __init__(
             self,
             data,
-            input_width: int,
-            output_width: int,
+            config,
             shift=1,
             batch_size=32,
-            train_ratio=None,
             shuffle=False,
     ):
         """
@@ -55,13 +57,13 @@ class TimeSeriesGenerator:
         self.scaler_x = None
         self.scaler_y = None
         self.raw_data = data
-        self.input_width = input_width
-        self.output_width = output_width
+        self.input_width = config['input_width']
+        self.output_length = config['output_length']
         self.shift = shift
         self.batch_size = batch_size
         self.shuffle = shuffle
 
-        self.split_data(train_ratio)
+        self.split_data(config['train_ratio'])
         self.data_train = self.build_tsd(self.X_train)
         self.data_valid = self.build_tsd(self.X_valid)
         if self.X_test is not None:
@@ -90,9 +92,22 @@ class TimeSeriesGenerator:
             return self.scaler_y.inverse_transform(y_predicted)
         return y_predicted
 
-    def re_arrange_sequence(self):
-        # self.data_train =
-        pass
+    def re_arrange_sequence(self, config):
+        """Arranges the input sequence to support Model1 training"""
+        self.data_train = (pattern(datapack=self.data_train[0],
+                                   kernel_size=config['kernel_size'],
+                                   gap=config['gap']),
+                           self.data_train[1])
+
+        self.data_valid = (pattern(datapack=self.data_valid[0],
+                                   kernel_size=config['kernel_size'],
+                                   gap=config['gap']),
+                           self.data_valid[1])
+        if self.data_test is not None:
+            self.data_test = (pattern(datapack=self.data_test[0],
+                                      kernel_size=config['kernel_size'],
+                                      gap=config['gap']),
+                              self.data_test[1])
 
     def normalize_data(self, standardization_type=1):
         """The mean and standard deviation should only be computed using the training data so that the models
@@ -138,14 +153,14 @@ class TimeSeriesGenerator:
 
     def build_tsd(self, data):
         X_data, y_label = [], []
-        if self.input_width >= len(data) - self.output_width - 168:
+        if self.input_width >= len(data) - self.output_length - 168:
             raise ValueError(
                 f"Cannot devide sequence with length={len(data)}. The dataset is too small to be used input_length= {self.input_width}. Please reduce your input_length"
             )
 
-        for i in range(self.input_width, len(data) - self.output_width):
+        for i in range(self.input_width, len(data) - self.output_length):
             X_data.append(data[i - self.input_width: i])
-            y_label.append(data[i: i + self.output_width])
+            y_label.append(data[i: i + self.output_length])
 
         X_data, y_label = np.array(X_data), np.array(y_label)
 
@@ -179,3 +194,8 @@ class Dataset:
             return CNU()
         elif self.dataset_name == comed_str:
             return COMED()
+        elif self.dataset_name == household_str:
+            return HouseholdDataLoader(
+                data_path=r'C:\Users\Andrew\Documents\Project\Time Series\dataset\Household_power_consumption\household_power_consumption.txt')
+        elif self.dataset_name == gyeonggi_str:
+            return GYEONGGI()
