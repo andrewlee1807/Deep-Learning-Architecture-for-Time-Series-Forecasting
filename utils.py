@@ -240,7 +240,7 @@ class TSF_Data:
     example:
     tsf = TSF_Data(data=공대7호관_HV_02.arr_seq_dataset,
                 input_width=21,
-                output_width=1,
+                output_length=1,
                 train_ratio=0.9)
     tsf.normalize_data(standardization_type=1)
     """
@@ -249,7 +249,7 @@ class TSF_Data:
         self,
         data,
         input_width: int,
-        output_width: int,
+        output_length: int,
         shift=1,
         batch_size=32,
         train_ratio=None,
@@ -268,7 +268,7 @@ class TSF_Data:
         self.scaler_y = None
         self.raw_data = data
         self.input_width = input_width
-        self.output_width = output_width
+        self.output_length = output_length
         self.shift = shift
         self.batch_size = batch_size
         self.shuffle = shuffle
@@ -357,14 +357,14 @@ class TSF_Data:
 
     def build_tsd(self, data):
         X_data, y_label = [], []
-        if self.input_width >= len(data) - self.output_width - 168:
+        if self.input_width >= len(data) - self.output_length - 168:
             raise ValueError(
                 f"Cannot devide sequence with length={len(data)}. The dataset is too small to be used input_length= {self.input_width}. Please reduce your input_length"
             )
 
-        for i in range(self.input_width, len(data) - self.output_width):
+        for i in range(self.input_width, len(data) - self.output_length):
             X_data.append(data[i - self.input_width : i])
-            y_label.append(data[i : i + self.output_width])
+            y_label.append(data[i : i + self.output_length])
 
         X_data, y_label = np.array(X_data), np.array(y_label)
 
