@@ -28,9 +28,10 @@ def arg_parse(parser):
     return parser.parse_args()
 
 
-def initialize_logging(file_name):
+def initialize_logging(file_name, pred_length):
     orig_stdout = sys.stdout
-    file_name = create_file(f'{file_name}.txt')
+    if pred_length == 1:  # firstly execute, so we need to create a new file
+        file_name = create_file(f'{file_name}.txt')
     f = open(file_name, 'a')
     sys.stdout = f
     # Because of using a file to log, so we need to print the time to know when the program is running
@@ -73,8 +74,8 @@ def warming_up(args):
         f"To check output running, open file {os.path.join(args.output_dir, args.dataset_name)}_{config['output_length']}")
     # initialize log file
     if args.write_log_file:
-        file, orig_stdout = initialize_logging(f'{os.path.join(args.output_dir, args.dataset_name)}_'
-                                               f'{config["output_length"]}')
+        file, orig_stdout = initialize_logging(f'{os.path.join(args.output_dir, args.dataset_name)}_training.log',
+                                               config["output_length"])
         config["file"] = file
         config["orig_stdout"] = orig_stdout
     return config
