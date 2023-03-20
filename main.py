@@ -8,6 +8,8 @@ from models import get_model, build_callbacks
 from utils.data import Dataset, TimeSeriesGenerator
 import yaml
 
+from utils.directory import create_file
+
 # folder to load config file
 CONFIG_PATH = "./"
 
@@ -28,12 +30,18 @@ def arg_parse(parser):
 
 def initialize_logging(file_name):
     orig_stdout = sys.stdout
-    f = open(f'{file_name}.txt', 'w')
+    file_name = create_file(f'{file_name}.txt')
+    f = open(file_name, 'a')
     sys.stdout = f
+    # Because of using a file to log, so we need to print the time to know when the program is running
+    import datetime
+    current_time = datetime.datetime.now().time()
+    print("Running time - ", current_time)
     return f, orig_stdout
 
 
 def close_logging(f, orig_stdout):
+    print("====================================================================================================\n\n\n")
     sys.stdout = orig_stdout
     f.close()
 
@@ -67,8 +75,8 @@ def warming_up(args):
     if args.write_log_file:
         file, orig_stdout = initialize_logging(f'{os.path.join(args.output_dir, args.dataset_name)}_'
                                                f'{config["output_length"]}')
-    config["file"] = file
-    config["orig_stdout"] = orig_stdout
+        config["file"] = file
+        config["orig_stdout"] = orig_stdout
     return config
 
 
@@ -121,6 +129,11 @@ def main():
                             use_multiprocessing=True)
     print("Evaluation result: ")
     print(config['output_length'], result[1], result[2])
+
+    result_file = f'{os.path.join(args.output_dir, args.dataset_name)}_evaluation_result.txt'
+    file = open(result_file, 'a')
+    file.write(f'{config["output_length"]} {result[1]} {result[2]}\n')
+    file.close()
 
     if args.write_log_file:
         close_logging(config["file"], config["orig_stdout"])
