@@ -24,14 +24,15 @@ def arg_parse(parser):
     # parser.add_argument('--num_features', type=int, default=1, help='Number of features')
     parser.add_argument('--device', type=int, default=0, help='CUDA Device')
     parser.add_argument('--output_dir', type=str, default='results', help='Output directory')
-    parser.add_argument('--write_log_file', type=bool, default=False, help='Export to log file')
+    parser.add_argument('--write_log_file', type=bool, default=False,
+                        help='Export to log file')  # if --write_log_file added, then we will export to log file
     return parser.parse_args()
 
 
 def initialize_logging(file_name, pred_length):
     orig_stdout = sys.stdout
     if pred_length == 1:  # firstly execute, so we need to create a new file
-        file_name = create_file(f'{file_name}.txt')
+        file_name = create_file(f'{file_name}')
     f = open(file_name, 'a')
     sys.stdout = f
     # Because of using a file to log, so we need to print the time to know when the program is running
@@ -58,9 +59,11 @@ def warming_up(args):
 
     print('Loading configuration file...')
     # read configuration
-    with open(args.config_path) as file:
+    with open(args.config_path, encoding='utf-8') as file:
         config = yaml.safe_load(file)
     config["output_length"] = args.output_length
+    config["dataset_name"] = args.dataset_name
+    config["tensorboard_log_dir"] = f'{args.output_dir}/tensorboard_log/{config["output_length"]}'
     print("Loaded configuration successfully ", args.config_path)
 
     print('Setting up output directory...')
@@ -69,11 +72,11 @@ def warming_up(args):
         os.makedirs(args.output_dir)
     print("Output directory: ", args.output_dir)
 
-    print("Starting running background")
-    print(
-        f"To check output running, open file {os.path.join(args.output_dir, args.dataset_name)}_{config['output_length']}")
     # initialize log file
     if args.write_log_file:
+        print("Starting running background")
+        print(
+            f"To check output running, open file \"{os.path.join(args.output_dir, args.dataset_name)}_{config['output_length']} \"")
         file, orig_stdout = initialize_logging(f'{os.path.join(args.output_dir, args.dataset_name)}_training.log',
                                                config["output_length"])
         config["file"] = file
@@ -88,8 +91,11 @@ def main():
     config = warming_up(args)
 
     # Load dataset
-    dataset = Dataset(dataset_name=args.dataset_name)
-    data = dataset.dataloader.export_a_single_sequence()
+    dataset = Dataset(dataset_name=config["dataset_name"])
+    # data = dataset.dataloader.export_a_single_sequence()
+    data = dataset.dataloader.export_the_sequence(config["features"])
+
+    # data = data[648:]
 
     # HOUSEHOLD dataset
     # dataloader = Dataset(dataset_name=args.dataset_name)
@@ -97,11 +103,13 @@ def main():
 
     print("Building time series generator...")
     tsf = TimeSeriesGenerator(data=data,
-                              config=config)
+                              config=config,
+                              normalize_type=1,
+                              shuffle=False)
 
     tsf.re_arrange_sequence(config)
 
-    tsf.normalize_data()
+    # tsf.normalize_data()
 
     print("Building model...")
     # Get model (built and summary)
@@ -109,7 +117,7 @@ def main():
                       config=config)
 
     # callbacks
-    callbacks = build_callbacks()
+    callbacks = build_callbacks(tensorboard_log_dir=config["tensorboard_log_dir"])
 
     # Train model
     history = model.fit(x=tsf.data_train[0],
