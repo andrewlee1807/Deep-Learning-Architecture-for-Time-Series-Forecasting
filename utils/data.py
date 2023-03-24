@@ -10,7 +10,9 @@ def pattern(datapack: np.array, kernel_size: int, gap=7):
     head_kernel_size = tail_kernel_size = kernel_size // 2
 
     # Padding
-    padding = np.zeros(gap + tail_kernel_size)
+    padding = np.zeros((gap + tail_kernel_size, datapack.shape[-1]))  # [padding, feature]
+
+    # padding = np.zeros(gap + tail_kernel_size)
 
     def generate_index(ix):
         for i in range(0, head_kernel_size):  # gen index from head
@@ -39,13 +41,20 @@ class TimeSeriesGenerator:
 
     def __init__(
             self,
-            data,
+            data: np.ndarray,
             config,
             shift=1,
-            batch_size=32,
             shuffle=False,
+            normalize_type=1
     ):
         """
+        :normalize: The mean and standard deviation should only be computed using the training data so that the models
+        have no access to the values in the validation and test sets.
+            1: MinMaxScaler,
+            2: StandardScaler,
+            3: RobustScaler,
+            4: PowerTransformer
+            None: no normalization # should not be used
         return:
         data_train,
         data_valid,
@@ -60,12 +69,26 @@ class TimeSeriesGenerator:
         self.input_width = config['input_width']
         self.output_length = config['output_length']
         self.shift = shift
-        self.batch_size = batch_size
         self.shuffle = shuffle
 
-        self.split_data(config['train_ratio'])
-        self.data_train = self.build_tsd(self.X_train)
-        self.data_valid = self.build_tsd(self.X_valid)
+        self.X_train, self.X_test = self.split_data(data, config['train_ratio'])
+
+        # ASSUME TRAIN AND TEST DATASET HAVE THE SAME DISTRIBUTION
+        self.scaler_engine = None  # This is for the normalization of the TRAIN dataset but apply to test and valid
+        if normalize_type is not None:
+            self.X_train, self.scaler_engine = self.normalize_dataset(self.X_train, standardization_type=normalize_type)
+            if self.X_test is not None:
+                self.X_test, _ = self.normalize_dataset(self.X_test, standardization_type=normalize_type,
+                                                        scaler=self.scaler_engine)
+
+        # Split train and valid dataset for TRAINING PROCESS. The distribution of train and valid dataset is the same.
+        self.X_train, self.X_valid = self.split_data(self.X_train, 0.9)
+        if normalize_type is not None:
+            self.X_valid, _ = self.normalize_dataset(self.X_valid, standardization_type=normalize_type,
+                                                     scaler=self.scaler_engine)
+
+        self.data_train = self.build_tsd(self.X_train)  # (13568, 2) -> [(13399, 168, 2), (13399, 1, 2)]
+        self.data_valid = self.build_tsd(self.X_valid)  # (1508, 2) -> [(1339, 168, 2), (1339, 1, 2)]
         if self.X_test is not None:
             self.data_test = self.build_tsd(self.X_test)
         else:
@@ -73,16 +96,56 @@ class TimeSeriesGenerator:
 
         # self.normalize_data()
 
-    def split_data(self, train_ratio):
-        self.X_test = None  # No testing, using whole data to train
-        X_train = self.raw_data
-        if train_ratio is not None:
-            X_train, self.X_test = train_test_split(
-                self.raw_data, train_size=train_ratio, shuffle=self.shuffle
-            )
-        self.X_train, self.X_valid = train_test_split(
-            X_train, train_size=0.9, shuffle=self.shuffle
-        )
+    def normalize_dataset(self, dataset, standardization_type, scaler=None):
+        """
+
+        :param scaler:
+        :param dataset: [Number of records, Number of features]
+        :param standardization_type:
+        :return:
+        """
+        from sklearn.preprocessing import MinMaxScaler
+        from sklearn.preprocessing import PowerTransformer
+        from sklearn.preprocessing import RobustScaler
+        from sklearn.preprocessing import StandardScaler
+
+        standardization_methods = {
+            1: MinMaxScaler,
+            2: StandardScaler,  # Gaussian distribution
+            3: RobustScaler,
+            4: PowerTransformer,
+        }
+        assert standardization_type in standardization_methods.keys()
+
+        standardization_method = standardization_methods[standardization_type]
+
+        # There are some NaN values in the dataset, but the Normalization ignores them (not effectively results)
+        if scaler is None:
+            scaler = standardization_method()
+
+        scaled_data = scaler.fit_transform(dataset)
+
+        return scaled_data, scaler
+
+    # def split_data(self, dataset, ratio):
+    #     X_test = None  # No testing, using whole data to train
+    #     X_train = self.raw_data
+    #     if ratio is not None:
+    #         X_train, X_test = train_test_split(
+    #             self.raw_data, train_size=ratio, shuffle=self.shuffle
+    #         )
+    #     X_train, X_valid = train_test_split(
+    #         X_train, train_size=0.9, shuffle=self.shuffle
+    #     )
+    #
+    #     return X_train, X_valid, X_test
+
+    def split_data(self, dataset, ratio):
+        X_test = None  # No testing, using whole data to train
+        X_train = dataset
+        if ratio is not None:
+            X_train, X_test = train_test_split(dataset, train_size=ratio, shuffle=self.shuffle)
+        return X_train, X_test
 
     def inverse_scale_transform(self, y_predicted):
         """
@@ -152,8 +215,14 @@ class TimeSeriesGenerator:
             self.data_test = self.data_test[0][..., np.newaxis], self.data_test[1]
 
     def build_tsd(self, data):
+        """
+        Build time series dataset ==> (VALUES_, LABELS_)
+        This function is used to build the time series dataset for training dataset, validation dataset and testing dataset
+        :param data: [Number of records, Number of features]
+        :return: [Number of records, INPUT_WIDTH, INPUT_DIMENSION], [Number of records, OUTPUT_LENGTH, OUTPUT_DIMENSION]
+        """
         X_data, y_label = [], []
-        if self.input_width >= len(data) - self.output_length - 168:
+        if self.input_width >= len(data) - self.output_length - self.input_width:
             raise ValueError(
                 f"Cannot devide sequence with length={len(data)}. The dataset is too small to be used input_length= {self.input_width}. Please reduce your input_length"
             )
