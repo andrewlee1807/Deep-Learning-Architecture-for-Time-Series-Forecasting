@@ -2,6 +2,7 @@
 #  Email: andrewlee1807@gmail.com
 import numpy as np
 import pandas as pd
+from abc import ABC, abstractmethod
 
 # List dataset name
 cnu_str = "CNU"
@@ -12,15 +13,17 @@ gyeonggi_str = "GYEONGGI"
 
 # Dataset path
 CONFIG_PATH = {
-    cnu_str: "https://raw.githubusercontent.com/andrewlee1807/Weights/main/datasets/%EA%B3%B5%EB%8C%807%ED%98%B8%EA%B4%80_HV_02.csv",
+    # cnu_str: "https://raw.githubusercontent.com/andrewlee1807/Weights/main/datasets/%EA%B3%B5%EB%8C%807%ED%98%B8%EA%B4%80_HV_02.csv",
+    cnu_str: "https://raw.githubusercontent.com/andrewlee1807/Weights/main/datasets/%EA%B3%B5%EB%8C%807%ED%98%B8%EA%B4%80_HV_02_datetime.csv",
     comed_str: "https://raw.githubusercontent.com/andrewlee1807/Weights/main/datasets/COMED_hourly.csv",
     spain_str: "https://raw.githubusercontent.com/andrewlee1807/Weights/main/datasets/spain/spain_ec_499.csv",
     household_str: "https://raw.githubusercontent.com/andrewlee1807/Weights/main/datasets/household_daily_power_consumption.csv",
-    gyeonggi_str: "https://raw.githubusercontent.com/andrewlee1807/Weights/main/datasets/gyeonggi_univariable/2955_1hour.csv"
+    gyeonggi_str: "https://raw.githubusercontent.com/andrewlee1807/Weights/main/datasets/gyeonggi_univariable/2955_1hour.csv",
+    # gyeonggi_str: "https://raw.githubusercontent.com/andrewlee1807/Weights/main/datasets/gyeonggi_multivariable/2955_1hour.csv"
 }
 
 
-class DataLoader:
+class DataLoader(ABC):
     """
     Class to be inheritance from others dataset
     """
@@ -39,7 +42,12 @@ class DataLoader:
     def read_a_single_sequence(self):
         return np.loadtxt(self.path_file)
 
+    @abstractmethod
     def export_a_single_sequence(self):
+        pass
+
+    @abstractmethod
+    def export_the_sequence(self, feature_names):
         pass
 
 
@@ -55,15 +63,27 @@ class GYEONGGI(DataLoader):
     def export_a_single_sequence(self):
         return self.raw_data['Amount of Consumption'].to_numpy()  # a single sequence
 
+    def export_the_sequence(self, feature_names):
+        return self.raw_data[feature_names].to_numpy()
+
 
 # CNU dataset
 class CNU(DataLoader):
     def __init__(self, path_file=None):
         super(CNU, self).__init__(path_file, cnu_str)
-        self.raw_data = self.read_a_single_sequence()
+        self.raw_data = self.read_data_frame()
+
+    # def export_a_single_sequence(self):
+    #     return self.raw_data  # a single sequence
+
+    def read_data_frame(self):
+        return pd.read_csv(self.path_file, header=0, sep=',')
 
     def export_a_single_sequence(self):
-        return self.raw_data  # a single sequence
+        return self.raw_data['전력사용량'].to_numpy()  # a single sequence
+
+    def export_the_sequence(self, feature_names):
+        return self.raw_data[feature_names].to_numpy()
 
 
 # COMED_hourly
