@@ -9,7 +9,7 @@ model2_str = "Model2"
 model3_str = "Model3"
 
 
-def build_callbacks(tensorboard_name=None):
+def build_callbacks(tensorboard_log_dir='logs', tensorboard_name=None):
     """Control and tracking learning process during training phase"""
     early_stopping = EarlyStopping(monitor='val_loss',
                                    patience=10,
@@ -17,11 +17,12 @@ def build_callbacks(tensorboard_name=None):
 
     reduceLR = ReduceLROnPlateau(factor=0.1, patience=3, min_lr=0.00001, verbose=1)
 
-    # TensorBoard(exp_path + "/log")
+    tensorboard_callback = TensorBoard(tensorboard_log_dir)
 
     callbacks = [
-        early_stopping,
-        reduceLR
+        # early_stopping,
+        reduceLR,
+        tensorboard_callback
     ]
     return callbacks
 
@@ -34,8 +35,27 @@ def initialize_model1(config):
                    target_size=config['output_length'])
     # print model
     input_test = Input(shape=(config['input_width'], config['num_features']))
-    model(input_test)
-    model.summary()
+    # model.build(input_test)
+    model.summary(input_test)
+    # Build model
+    model.compile(loss=Huber(),
+                  optimizer=config['optimizer'],
+                  metrics=config['metrics'])
+
+    return model
+
+
+def initialize_model2(config):
+    model = Model2(list_stride=config['list_stride'],
+                   list_dilation=config['list_dilation'],
+                   nb_filters=config['nb_filters'],
+                   kernel_size=config['kernel_size'],
+                   target_size=config['output_length'])
+
+    # print model
+    input_test = Input(shape=(config['input_width'], config['num_features']))
+    # model(input_test)
+    model.summary(input_test)
     # Build model
     model.compile(loss=Huber(),
                   optimizer=config['optimizer'],
@@ -49,7 +69,7 @@ def get_model(model_name: str, config) -> object:
     if model_name == model1_str.upper():
         return initialize_model1(config)
     elif model_name == model2_str.upper():
-        pass
+        return initialize_model2(config)
     elif model_name == model3_str.upper():
         pass
     return None
