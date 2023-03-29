@@ -6,18 +6,30 @@ from abc import ABC, abstractmethod
 
 # List dataset name
 cnu_str = "CNU"
+cnu_str_engineering_7 = "CNU_ENGINEERING_7"
+cnu_str_engineering_3 = "CNU_ENGINEERING_3"
+cnu_str_agriculture_3 = "CNU_AGRICULTURE_3"
+cnu_str_agriculture_4 = "CNU_AGRICULTURE_4"
+cnu_str_headquarter = "CNU_HEADQUARTER"
+cnu_str_truth = "CNU_TRUTH"
 comed_str = "COMED"
 spain_str = "SPAIN"
-household_str = "HOUSEHOLD"
+france_household_hour_str = "FRANCE_HOUSEHOLD_HOUR"
 gyeonggi_str = "GYEONGGI"
 
 # Dataset path
 CONFIG_PATH = {
     # cnu_str: "https://raw.githubusercontent.com/andrewlee1807/Weights/main/datasets/%EA%B3%B5%EB%8C%807%ED%98%B8%EA%B4%80_HV_02.csv",
     cnu_str: "https://raw.githubusercontent.com/andrewlee1807/Weights/main/datasets/%EA%B3%B5%EB%8C%807%ED%98%B8%EA%B4%80_HV_02_datetime.csv",
+    cnu_str_engineering_7: "https://raw.githubusercontent.com/andrewlee1807/Weights/main/datasets/cnu_multivariable/Engineering-building-7.csv",
+    cnu_str_engineering_3: "https://raw.githubusercontent.com/andrewlee1807/Weights/main/datasets/cnu_multivariable/Engineering-building-3.csv",
+    cnu_str_agriculture_3: "https://raw.githubusercontent.com/andrewlee1807/Weights/main/datasets/cnu_multivariable/Agricultural-building-3.csv",
+    cnu_str_agriculture_4: "https://raw.githubusercontent.com/andrewlee1807/Weights/main/datasets/cnu_multivariable/Agricultural-building-4.csv",
+    cnu_str_headquarter: "https://raw.githubusercontent.com/andrewlee1807/Weights/main/datasets/cnu_multivariable/Headquarter.csv",
+    cnu_str_truth: "https://raw.githubusercontent.com/andrewlee1807/Weights/main/datasets/cnu_multivariable/Truth-building.csv",
     comed_str: "https://raw.githubusercontent.com/andrewlee1807/Weights/main/datasets/COMED_hourly.csv",
     spain_str: "https://raw.githubusercontent.com/andrewlee1807/Weights/main/datasets/spain/spain_ec_499.csv",
-    household_str: "https://raw.githubusercontent.com/andrewlee1807/Weights/main/datasets/household_daily_power_consumption.csv",
+    france_household_hour_str: "https://raw.githubusercontent.com/andrewlee1807/Weights/main/datasets/france_household/france_household_hour_power_consumption.csv",
     gyeonggi_str: "https://raw.githubusercontent.com/andrewlee1807/Weights/main/datasets/gyeonggi_univariable/2955_1hour.csv",
     # gyeonggi_str: "https://raw.githubusercontent.com/andrewlee1807/Weights/main/datasets/gyeonggi_multivariable/2955_1hour.csv"
 }
@@ -46,9 +58,8 @@ class DataLoader(ABC):
     def export_a_single_sequence(self):
         pass
 
-    @abstractmethod
     def export_the_sequence(self, feature_names):
-        pass
+        return self.raw_data[feature_names].to_numpy()
 
 
 # GYEONGGI dataset
@@ -62,9 +73,6 @@ class GYEONGGI(DataLoader):
 
     def export_a_single_sequence(self):
         return self.raw_data['Amount of Consumption'].to_numpy()  # a single sequence
-
-    def export_the_sequence(self, feature_names):
-        return self.raw_data[feature_names].to_numpy()
 
 
 # CNU dataset
@@ -81,9 +89,6 @@ class CNU(DataLoader):
 
     def export_a_single_sequence(self):
         return self.raw_data['전력사용량'].to_numpy()  # a single sequence
-
-    def export_the_sequence(self, feature_names):
-        return self.raw_data[feature_names].to_numpy()
 
 
 # COMED_hourly
@@ -112,18 +117,21 @@ def fill_missing(data):
                 data[row, col] = data[row - one_day, col]
 
 
-class HouseholdDataLoader:
-    def __init__(self, data_path=None):
-        self.df = None
-        self.data_by_days = None
-        self.data_by_hour = None
-        self.data_path = data_path
-        self.load_data()
+class FRANCEHOUSEHOLD(DataLoader):
+    def __init__(self, path_file=None):
+        super(FRANCEHOUSEHOLD, self).__init__(path_file, france_household_hour_str)
+        self.raw_data = self.read_data_frame()
+
+    def read_data_frame(self):
+        return pd.read_csv(self.path_file, header=0, sep=',')
+
+    def export_a_single_sequence(self):
+        pass
 
     def load_data(self):
 
         df = pd.read_csv(self.data_path, sep=';',
-                         parse_dates={'dt': ['Date', 'Time']},
+                         parse_dates={'Datatime': ['Date', 'Time']},
                          infer_datetime_format=True,
                          low_memory=False, na_values=['nan', '?'],
                          index_col='dt')
