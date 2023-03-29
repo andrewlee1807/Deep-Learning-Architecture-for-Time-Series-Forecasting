@@ -1,7 +1,7 @@
 #INITIAL SETTINGS
 kernel_size: 12
 nb_filters: 64  # Số lượng filter trong mỗi kernel mask
-list_dilation: [1, 2]
+list_dilation: [ 1, 2, 4, 8, 16, 32, 64]
 input_width: 168
 output_length: 1 # predict 1 hour
 train_ratio: 0.9
