@@ -107,7 +107,8 @@ def main():
                               normalize_type=1,
                               shuffle=False)
 
-    tsf.re_arrange_sequence(config)
+    if "model" in config["dataset_name"]:  # delayNet model
+        tsf.re_arrange_sequence(config)
 
     # tsf.normalize_data()
 
@@ -120,12 +121,13 @@ def main():
     callbacks = build_callbacks(tensorboard_log_dir=config["tensorboard_log_dir"])
 
     # Train model
-    history = model.fit(x=tsf.data_train[0],
-                        y=tsf.data_train[1],
+    history = model.fit(x=tsf.data_train[0],  # [number_recoder, input_len, number_feature]
+                        y=tsf.data_train[1],  # [number_recoder, output_len, number_feature]
                         validation_data=tsf.data_valid,
                         epochs=100,
                         callbacks=[callbacks],
                         verbose=2,
+                        batch_size=64,
                         use_multiprocessing=True)
 
     print("=============================================================")
