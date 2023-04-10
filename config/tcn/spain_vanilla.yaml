@@ -1,0 +1,11 @@
+#INITIAL SETTINGS
+kernel_size: 12 # Sẽ là số chẳn vì kernal size này sẽ chia làm 2 phần
+list_dilation: [1, 2]
+nb_filters: 64  # Số lượng filter trong mỗi kernal mask
+input_width: 168
+output_length: 1 # predict 1 hour
+train_ratio: 0.9
+num_features: 1
+#features: ['전력사용량']  # Features to use for training
+optimizer: "adam"
+metrics: [ 'mse', 'mae' ]
