@@ -227,7 +227,6 @@ class TimeSeriesGenerator:
             )
             self.data_test = self.data_test[0][..., np.newaxis], self.data_test[1]
 
-
     def build_tsd_test(self, data):
         """
         Build time series dataset ==> (VALUES_, LABELS_)
@@ -302,3 +301,7 @@ class Dataset:
             return FRANCEHOUSEHOLD()
         elif self.dataset_name == gyeonggi_str:
             return GYEONGGI()
+        elif self.dataset_name == spain_str:
+            return SPAIN()
+
+        return None

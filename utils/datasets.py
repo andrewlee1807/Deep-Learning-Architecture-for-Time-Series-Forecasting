@@ -100,13 +100,20 @@ class COMED(DataLoader):
 
 # Spain dataset
 class SPAIN(DataLoader):
+    # TODO:
+    # Combine all the datasets: POWER Consumption & Weather Data, into one dataset
     def __init__(self, path_file=None):
         super(SPAIN, self).__init__(path_file, spain_str)
-        self.dataframe = self.read_data_frame()
+        self.raw_data = self.read_data_frame()
 
     def export_a_single_sequence(self):
         # Pick the customer no 20
-        return self.dataframe.loc[:, 20]  # a single sequence
+        return self.raw_data.loc[:, '20']  # a single sequence
+
+    def export_the_sequence(self, feature_names):
+        # must change this function after changing dataset
+        return self.export_a_single_sequence().to_numpy().reshape(-1, 1)
+        # return self.raw_data[feature_names].to_numpy()
 
 
 def fill_missing(data):
