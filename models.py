@@ -1,5 +1,4 @@
 from delayedtcn.models import *
-from tcnbased.tcn_family import TCN_Vanilla
 from tensorflow.keras.losses import Huber
 from tensorflow.keras.layers import Input
 from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau, TensorBoard
@@ -65,6 +64,7 @@ def initialize_model2(config):
 
 
 def initialize_tcn_model(config):
+    from tcnbased.tcn_family import TCN_Vanilla
     model = TCN_Vanilla(input_width=config['input_width'],
                         dilations=config['list_dilation'],
                         nb_filters=config['nb_filters'],
