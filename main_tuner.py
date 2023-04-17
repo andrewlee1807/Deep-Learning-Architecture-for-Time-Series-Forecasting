@@ -22,7 +22,7 @@ def arg_parse(parser):
     parser.add_argument('--dataset_path', type=str, default='../dataset/', help='Dataset path')
     parser.add_argument('--config_path', type=str, help='Configuration file path')
     parser.add_argument('--output_length', type=int, default=1, help='Prediction Length')
-    parser.add_argument('--max_trials', type=int, default=20, help='Max trials')
+    parser.add_argument('--max_trials', type=int, default=10, help='Max trials')
     parser.add_argument('--device', type=int, default=0, help='CUDA Device')
     parser.add_argument('--output_dir', type=str, default='results', help='Output directory')
     parser.add_argument('--write_log_file', type=bool, default=False,
@@ -109,8 +109,8 @@ def main():
                               normalize_type=1,
                               shuffle=False)
 
-    if "model" in config["dataset_name"]:  # delayNet model
-        tsf.re_arrange_sequence(config)
+    #if "model" in config["dataset_name"]:  # delayNet model
+    tsf.re_arrange_sequence(config)
 
     # tsf.normalize_data()
 
@@ -147,17 +147,9 @@ def main():
             for key, value in hyperparameters.items():
                 print(f"{key}: {value}")
 
-    def on_trial_endd(trial):
-        print("OKOKOKOK")
-        layer_stride1 = trial.hyperparameters.values['layer_stride1']
-        kernel_size = trial.hyperparameters.values['kernel_size']
-        config['gap'] = layer_stride1
-        config['kernel_size'] = kernel_size
-        tsf.re_arrange_sequence(config)
-        # Modify the dataset input here based on the value of layer_stride1
 
-    tuner.search(config, tsf, tsf.data_train[0], tsf.data_train[1],
-                 validation_data=tsf.data_valid,
+    tuner.search(config, tsf, tsf.data_train_adjustment[0], tsf.data_train_adjustment[1],
+                 validation_data=tsf.data_valid_adjustment,
                  epochs=10,
                  )
                  # callbacks=[PrintTunerHyperparameters()])
@@ -171,19 +163,26 @@ def main():
     # Train real model_searching
     print(f"""
                 kernel_size {best_hps.get('kernel_size')}, \n
-                nb_filters {best_hps.get('nb_filters')}, \n
                 layer_stride1 {best_hps.get('layer_stride1')}, \n
                 """)
 
     print('Train...')
 
+    layer_stride1 = best_hps.get('layer_stride1')
+    kernel_size = best_hps.get('kernel_size')
+    print(layer_stride1)
+    print(kernel_size)
+    config['gap'] = layer_stride1
+    config['kernel_size'] = kernel_size
+    tsf.re_arrange_sequence(config)
+
     # callbacks
     callbacks = build_callbacks(tensorboard_log_dir=config["tensorboard_log_dir"])
 
     # Train model
-    history = model_tuner.fit(x=tsf.data_train[0],  # [number_recoder, input_len, number_feature]
-                              y=tsf.data_train[1],  # [number_recoder, output_len, number_feature]
-                              validation_data=tsf.data_valid,
+    history = model_tuner.fit(x=tsf.data_train_adjustment[0],  # [number_recoder, input_len, number_feature]
+                              y=tsf.data_train_adjustment[1],  # [number_recoder, output_len, number_feature]
+                              validation_data=tsf.data_valid_adjustment,
                               epochs=100,
                               callbacks=[callbacks],
                               verbose=2,
