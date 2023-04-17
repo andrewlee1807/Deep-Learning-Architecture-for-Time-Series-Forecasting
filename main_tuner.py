@@ -5,7 +5,7 @@ import os
 import sys
 import argparse
 from ho_models import get_model, build_callbacks
-from utils.data import Dataset, TimeSeriesGenerator
+from utils.data_tuner import Dataset, TimeSeriesGenerator
 import yaml
 import keras_tuner as kt
 
