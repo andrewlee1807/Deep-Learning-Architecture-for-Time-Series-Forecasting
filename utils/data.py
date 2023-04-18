@@ -293,8 +293,9 @@ class Dataset:
         self.dataloader = self.__load_data()
 
     def __load_data(self):
-        if self.dataset_name == cnu_str:
-            return CNU()
+        if self.dataset_name == cnu_str or \
+                self.dataset_name == cnu_str_engineering_7:
+            return CNU(data_name=self.dataset_name)
         elif self.dataset_name == comed_str:
             return COMED()
         elif self.dataset_name == france_household_hour_str:

@@ -77,8 +77,11 @@ class GYEONGGI(DataLoader):
 
 # CNU dataset
 class CNU(DataLoader):
-    def __init__(self, path_file=None):
-        super(CNU, self).__init__(path_file, cnu_str)
+    def __init__(self, data_name=None, path_file=None):
+        if data_name is None:
+            super(CNU, self).__init__(path_file, cnu_str)
+        else:
+            super(CNU, self).__init__(path_file, data_name)
         self.raw_data = self.read_data_frame()
 
     # def export_a_single_sequence(self):
@@ -88,7 +91,10 @@ class CNU(DataLoader):
         return pd.read_csv(self.path_file, header=0, sep=',')
 
     def export_a_single_sequence(self):
-        return self.raw_data['전력사용량'].to_numpy()  # a single sequence
+        try:
+            return self.raw_data['전력사용량'].to_numpy()  # a single sequence
+        except:
+            return self.raw_data['energy'].to_numpy()  # a single sequence
 
 
 # COMED_hourly
