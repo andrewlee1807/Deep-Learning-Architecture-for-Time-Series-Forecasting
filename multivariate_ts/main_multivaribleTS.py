@@ -127,7 +127,7 @@ def main():
                         epochs=100,
                         callbacks=[callbacks],
                         verbose=2,
-                        batch_size=64,
+                        batch_size=128,
                         use_multiprocessing=True)
 
     print("=============================================================")

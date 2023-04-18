@@ -10,6 +10,7 @@ model3_str = "Model3"
 
 # comparing model names
 tcn_model_str = "TCN"
+lstm_model_str = "LSTM"
 
 
 def build_callbacks(tensorboard_log_dir='logs', tensorboard_name=None):
@@ -69,10 +70,23 @@ def initialize_tcn_model(config):
                         dilations=config['list_dilation'],
                         nb_filters=config['nb_filters'],
                         kernel_size=config['kernel_size'],
-                        num_features=config['num_features'],
+                        num_features=len(config['features']),
                         target_size=config['output_length'])
 
     return compile_model(model, config)
+
+
+def initialize_lstm_model(config):
+    from multivariate_ts.baselinemodels import LSTMModel
+    lstm_model = LSTMModel(input_width=config['input_width'],
+                           num_hidden_layer=config['num_hidden_layer'],
+                           num_features=len(config['features']),
+                           output_length=config['output_length'])
+
+    lstm_model.compile_model(optimizer=config['optimizer'],
+                             metrics=config['metrics'])
+
+    return lstm_model.model
 
 
 def get_model(model_name: str, config) -> object:
@@ -85,5 +99,7 @@ def get_model(model_name: str, config) -> object:
         pass
     elif model_name == tcn_model_str.upper():
         return initialize_tcn_model(config)
+    elif model_name == lstm_model_str.upper():
+        return initialize_lstm_model(config)
 
     return None

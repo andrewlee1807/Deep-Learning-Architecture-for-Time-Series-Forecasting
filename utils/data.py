@@ -100,10 +100,15 @@ class TimeSeriesGenerator:
             self.X_valid, _ = self.normalize_dataset(self.X_valid, standardization_type=normalize_type,
                                                      scaler=self.scaler_engine)
 
-        self.data_train = self.build_tsd(self.X_train)  # (13568, X) -> [(13399, 168, X), (13399, 1, X)]
-        self.data_valid = self.build_tsd(self.X_valid)  # (1508, X) -> [(1339, 168, X), (1339, 1, X)]
+        # (13568, X) -> [(13399, 168, X), (13399, 1, prediction_step)]
+        self.data_train = self.build_tsd(self.X_train,
+                                         config["features"].index(config["prediction_feature"]))
+        # (1508, X) -> [(1339, 168, X), (1339, prediction_step)]
+        self.data_valid = self.build_tsd(self.X_valid,
+                                         config["features"].index(config["prediction_feature"]))
         if self.X_test is not None:
-            self.data_test = self.build_tsd(self.X_test)
+            self.data_test = self.build_tsd(self.X_test,
+                                            config["features"].index(config["prediction_feature"]))
         else:
             self.data_test = None
 
@@ -248,12 +253,15 @@ class TimeSeriesGenerator:
 
         return X_data, y_label
 
-    def build_tsd(self, data):
+    def build_tsd(self, data, feature_order):
         """
         Build time series dataset ==> (VALUES_, LABELS_)
         This function is used to build the time series dataset for training dataset, validation dataset and testing dataset
         :param data: [Number of records, Number of features]
         :return: [Number of records, INPUT_WIDTH, INPUT_DIMENSION], [Number of records, OUTPUT_LENGTH, OUTPUT_DIMENSION]
+
+        Args:
+            feature_order: Which feature will be predicted
         """
         X_data, y_label = [], []
         if self.input_width >= len(data) - self.output_length - self.input_width:
@@ -263,7 +271,7 @@ class TimeSeriesGenerator:
 
         for i in range(self.input_width, len(data) - self.output_length):
             X_data.append(data[i - self.input_width: i])
-            y_label.append(data[i: i + self.output_length])
+            y_label.append(data[i: i + self.output_length][::, feature_order])
 
         X_data, y_label = np.array(X_data), np.array(y_label)
 

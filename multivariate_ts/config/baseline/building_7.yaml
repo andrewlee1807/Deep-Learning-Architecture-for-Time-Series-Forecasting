@@ -1,11 +1,13 @@
 #INITIAL SETTINGS
 kernel_size: 12
 nb_filters: 64  # Số lượng filter trong mỗi kernal mask
-list_dilation: [1, 2]
+list_dilation: [ 1, 2 ]
+num_hidden_layer: [ 200, 100 ]
 input_width: 168
 output_length: 1 # predict 1 hour
 train_ratio: 0.9
 num_features: 1
-features: ['temperatures', "humidity", "pressure", "energy"]  # Features to use for training
+features: [ 'temperatures', "humidity", "pressure", "energy" ]  # Features to use for training
+prediction_feature: "energy"  # Feature to use for prediction
 optimizer: "adam"
 metrics: [ 'mse', 'mae' ]

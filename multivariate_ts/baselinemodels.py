@@ -4,16 +4,26 @@
 import tensorflow as tf
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import LSTM, Dense
+from tensorflow.keras.losses import Huber
+
 
 class LSTMModel:
-    def __init__(self):
+    def __init__(self,
+                 input_width,
+                 num_hidden_layer=(64, 32),
+                 num_features=1,
+                 output_length=1
+                 ):
         self.model = Sequential()
-        self.model.add(LSTM(64, input_shape=(168, 4), return_sequences=True))
-        self.model.add(LSTM(32))
-        self.model.add(Dense(12))
+        self.model.add(LSTM(num_hidden_layer[0], input_shape=(input_width, num_features), return_sequences=True))
+        self.model.add(LSTM(num_hidden_layer[1]))
+        self.model.add(Dense(output_length))
 
-    def compile_model(self):
-        self.model.compile(optimizer='adam', loss='mse')
+    def compile_model(self, optimizer, metrics):
+        self.model.compile(optimizer=optimizer,
+                           loss=Huber(),
+                           metrics=metrics)
+        self.model.summary()
 
     def train_model(self, X_train, y_train, epochs):
         y_train = y_train.reshape(-1, 3, 4)
