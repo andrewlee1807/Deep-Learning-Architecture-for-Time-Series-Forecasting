@@ -4,3 +4,4 @@ scikit-learn
 matplotlib
 PyYAML
 keras-tcn
+tensorflow<2.11
