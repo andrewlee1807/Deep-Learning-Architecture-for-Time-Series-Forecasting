@@ -3,6 +3,8 @@ from tensorflow.keras.losses import Huber
 from tensorflow.keras.layers import Input
 from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau, TensorBoard
 
+from multivariate_ts.baselinemodels import LSTMModel, GRUModel, MLPModel
+
 # List model name
 model1_str = "Model1"
 model2_str = "Model2"
@@ -11,6 +13,8 @@ model3_str = "Model3"
 # comparing model names
 tcn_model_str = "TCN"
 lstm_model_str = "LSTM"
+gru_model_str = "GRU"
+mlp_model_str = "MLP"
 
 
 def build_callbacks(tensorboard_log_dir='logs', tensorboard_name=None):
@@ -76,17 +80,16 @@ def initialize_tcn_model(config):
     return compile_model(model, config)
 
 
-def initialize_lstm_model(config):
-    from multivariate_ts.baselinemodels import LSTMModel
-    lstm_model = LSTMModel(input_width=config['input_width'],
-                           num_hidden_layer=config['num_hidden_layer'],
-                           num_features=len(config['features']),
-                           output_length=config['output_length'])
+def initialize_baseline_model(config, model_class):
+    baseline_model = model_class(input_width=config['input_width'],
+                                 num_hidden_layer=config['num_hidden_layer'],
+                                 num_features=len(config['features']),
+                                 output_length=config['output_length'])
 
-    lstm_model.compile_model(optimizer=config['optimizer'],
-                             metrics=config['metrics'])
+    baseline_model.compile_model(optimizer=config['optimizer'],
+                                 metrics=config['metrics'])
 
-    return lstm_model.model
+    return baseline_model.model
 
 
 def get_model(model_name: str, config) -> object:
@@ -100,6 +103,10 @@ def get_model(model_name: str, config) -> object:
     elif model_name == tcn_model_str.upper():
         return initialize_tcn_model(config)
     elif model_name == lstm_model_str.upper():
-        return initialize_lstm_model(config)
+        return initialize_baseline_model(config, LSTMModel)
+    elif model_name == gru_model_str.upper():
+        return initialize_baseline_model(config, GRUModel)
+    elif model_name == mlp_model_str.upper():
+        return initialize_baseline_model(config, MLPModel)
 
     return None
