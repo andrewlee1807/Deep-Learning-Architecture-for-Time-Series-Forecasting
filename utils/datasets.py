@@ -16,6 +16,7 @@ comed_str = "COMED"
 spain_str = "SPAIN"
 france_household_hour_str = "FRANCE_HOUSEHOLD_HOUR"
 gyeonggi_str = "GYEONGGI"
+gyeonggi2955_str = "GYEONGGI2955"
 
 # Dataset path
 CONFIG_PATH = {
@@ -31,7 +32,7 @@ CONFIG_PATH = {
     spain_str: "https://raw.githubusercontent.com/andrewlee1807/Weights/main/datasets/spain/spain_ec_499.csv",
     france_household_hour_str: "https://raw.githubusercontent.com/andrewlee1807/Weights/main/datasets/france_household/france_household_hour_power_consumption.csv",
     gyeonggi_str: "https://raw.githubusercontent.com/andrewlee1807/Weights/main/datasets/gyeonggi_univariable/2955_1hour.csv",
-    # gyeonggi_str: "https://raw.githubusercontent.com/andrewlee1807/Weights/main/datasets/gyeonggi_multivariable/2955_1hour.csv"
+    gyeonggi2955_str: "https://raw.githubusercontent.com/andrewlee1807/Weights/main/datasets/gyeonggi_multivariable/2955_1hour.csv"
 }
 
 
@@ -64,8 +65,11 @@ class DataLoader(ABC):
 
 # GYEONGGI dataset
 class GYEONGGI(DataLoader):
-    def __init__(self, path_file=None):
-        super(GYEONGGI, self).__init__(path_file, gyeonggi_str)
+    def __init__(self, data_name=None, path_file=None):
+        if data_name is None:
+            super(GYEONGGI, self).__init__(path_file, gyeonggi_str)
+        else:
+            super(GYEONGGI, self).__init__(path_file, data_name)
         self.raw_data = self.read_data_frame()
 
     def read_data_frame(self):

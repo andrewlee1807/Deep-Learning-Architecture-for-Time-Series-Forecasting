@@ -304,12 +304,17 @@ class Dataset:
         if self.dataset_name == cnu_str or \
                 self.dataset_name == cnu_str_engineering_7:
             return CNU(data_name=self.dataset_name)
+
         elif self.dataset_name == comed_str:
             return COMED()
+
         elif self.dataset_name == france_household_hour_str:
             return FRANCEHOUSEHOLD()
-        elif self.dataset_name == gyeonggi_str:
-            return GYEONGGI()
+
+        elif self.dataset_name == gyeonggi_str or \
+                self.dataset_name == gyeonggi2955_str:
+            return GYEONGGI(data_name=self.dataset_name)
+
         elif self.dataset_name == spain_str:
             return SPAIN()
 
