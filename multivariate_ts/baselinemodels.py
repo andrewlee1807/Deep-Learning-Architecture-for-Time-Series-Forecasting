@@ -16,7 +16,10 @@ class LSTMModel:
                  ):
         self.model = Sequential()
         self.model.add(LSTM(num_hidden_layer[0], input_shape=(input_width, num_features), return_sequences=True))
-        self.model.add(LSTM(num_hidden_layer[1]))
+        for i in range(1, len(num_hidden_layer)):
+            self.model.add(LSTM(num_hidden_layer[i], return_sequences=True))
+        # self.model.add(LSTM(num_hidden_layer[1], return_sequences=True))
+        # self.model.add(LSTM(num_hidden_layer[2]))
         self.model.add(Dense(output_length))
 
     def compile_model(self, optimizer, metrics):
@@ -24,11 +27,3 @@ class LSTMModel:
                            loss=Huber(),
                            metrics=metrics)
         self.model.summary()
-
-    def train_model(self, X_train, y_train, epochs):
-        y_train = y_train.reshape(-1, 3, 4)
-        self.model.fit(X_train, y_train, epochs=epochs)
-
-    def predict(self, X_test):
-        y_pred = self.model.predict(X_test)
-        return y_pred.reshape(-1, 3, 4)
