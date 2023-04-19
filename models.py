@@ -33,7 +33,7 @@ def build_callbacks(tensorboard_log_dir='logs', tensorboard_name=None):
 
 def compile_model(model, config):
     # print model
-    input_test = Input(shape=(config['input_width'], config['num_features']))
+    input_test = Input(shape=(config['input_width'], len(config['features'])))
     # model.build(input_test)
     model.summary(input_test)
     # Build model
