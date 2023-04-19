@@ -1,15 +1,14 @@
-#INITIAL SETTINGS
+#INITIAL SETTINGS: FOR LSTM and TCN
 kernel_size: 12
 nb_filters: 64  # Số lượng filter trong mỗi kernal mask
 list_dilation: [ 1, 2 ]
-list_stride: [ 24, 1]  # Khả năng cao là giá trị đầu của list_stride = gap
 num_hidden_layer: [ 50, 100 , 100]
 input_width: 168
 output_length: 1 # predict 1 hour
 train_ratio: 0.9
 epochs: 50
 batch_size: 512
-features: ["energy" ]  # Features to use for training
+features: [ "temperatures", "humidity", "pressure","energy" ]  # Features to use for training
 prediction_feature: "energy"  # Feature to use for prediction
 optimizer: "adam"
 metrics: [ 'mse', 'mae' ]
