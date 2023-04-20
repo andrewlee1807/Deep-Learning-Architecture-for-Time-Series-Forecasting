@@ -13,8 +13,9 @@ class Baseline:
     def initialize_model(self, model_class, input_width, num_hidden_layer, num_features, output_length):
         self.model = Sequential()
         self.model.add(model_class(num_hidden_layer[0], input_shape=(input_width, num_features), return_sequences=True))
-        for i in range(1, len(num_hidden_layer)):
+        for i in range(1, len(num_hidden_layer) - 1):
             self.model.add(model_class(num_hidden_layer[i], return_sequences=True))
+        self.model.add(model_class(num_hidden_layer[-1], return_sequences=False))
         self.model.add(Dense(output_length))
 
     def compile_model(self, optimizer, metrics):
