@@ -6,7 +6,7 @@
 - Data visualization
 - Training and testing model
 
-## Dataset 1: CNU
+## I. Dataset 1: CNU
 - We have 6 sub-datasets but we just try to experiment with one sub-dataset: "Engineering-building-7"
 - There are including 4 features: "date","temperatures","humidity","pressure","energy"
 - Some NULL values in the dataset, we need to handle it
@@ -81,4 +81,44 @@ df.interpolate(method='linear', inplace=True)
 9/30/2021 22:00,21.2,75,1000.3,149.248
 9/30/2021 23:00,21.2,75,1000.3,143.808
 10/1/2021 0:00,19.5,80,1000.3,132.672
+```
+
+## II. Dataset 2: Gyeonggi for clientID = 2955
+- There are including 2 features: "Amount of Consumption", "Temperature"
+- Some NULL values in the dataset, we need to handle it
+```json
+      Unnamed: 0             datetime  Amount of Consumption  Temperature
+1130        2027  2020-11-15 02:00:00                   2.67          6.5
+1131        2028  2020-11-15 03:00:00                   2.79          6.5
+1132        2029  2020-11-15 04:00:00                   2.28          NaN
+1133        2030  2020-11-15 05:00:00                   2.28          NaN
+1134        2031  2020-11-15 06:00:00                   2.41          NaN
+1135        2032  2020-11-15 07:00:00                   2.80          NaN
+1136        2033  2020-11-15 08:00:00                   2.62          6.3
+1137        2034  2020-11-15 09:00:00                   2.18          7.6
+1138        2035  2020-11-15 10:00:00                   2.14         10.1
+1139        2036  2020-11-15 11:00:00                   3.69         13.3
+```
+- There are 21 NaN values in the Temperature column at `[79,  1132,  1133,  1134,  1135,  4262,  4263,  4264,  4265,
+        4266,  4267,  4542,  4917,  5026,  5053,  5081,  5287,  6493, 14407, 14738, 15880]`
+
+
+- We need to fill the NULL values with the mean of the column
+```python
+# fill the missing values using linear interpolation
+df.interpolate(method='linear', inplace=True)
+```
+
+```json
+      Unnamed: 0             datetime  Amount of Consumption  Temperature
+1130        2027  2020-11-15 02:00:00                   2.67         6.50
+1131        2028  2020-11-15 03:00:00                   2.79         6.50
+1132        2029  2020-11-15 04:00:00                   2.28         6.46
+1133        2030  2020-11-15 05:00:00                   2.28         6.42
+1134        2031  2020-11-15 06:00:00                   2.41         6.38
+1135        2032  2020-11-15 07:00:00                   2.80         6.34
+1136        2033  2020-11-15 08:00:00                   2.62         6.30
+1137        2034  2020-11-15 09:00:00                   2.18         7.60
+1138        2035  2020-11-15 10:00:00                   2.14        10.10
+1139        2036  2020-11-15 11:00:00                   3.69        13.30
 ```

@@ -1,0 +1,14 @@
+#INITIAL SETTINGS: FOR LSTM and TCN
+kernel_size: 12
+nb_filters: 64  # Số lượng filter trong mỗi kernal mask
+list_dilation: [ 1, 2 ]
+num_hidden_layer: [ 50, 100 , 100]
+input_width: 168
+output_length: 1 # predict 1 hour
+train_ratio: 0.9
+epochs: 10
+batch_size: 64
+features: [ "Amount of Consumption", "Temperature" ]  # Features to use for training
+prediction_feature: "Amount of Consumption"  # Feature to use for prediction
+optimizer: "adam"
+metrics: [ 'mse', 'mae' ]
