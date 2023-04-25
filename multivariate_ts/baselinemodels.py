@@ -2,7 +2,7 @@
 #  Email: andrewlee1807@gmail.com
 
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import LSTM, GRU, Dense
+from tensorflow.keras.layers import LSTM, GRU, Dense, Flatten, Input
 from tensorflow.keras.losses import Huber
 
 
@@ -42,8 +42,20 @@ class GRUModel(Baseline):
 class MLPModel(Baseline):
     def __init__(self, input_width, num_hidden_layer=(100, 200), num_features=1, output_length=1):
         super().__init__()
+        self.input_width = input_width
+        self.num_features = num_features
         self.model = Sequential()
+        self.model.add(Flatten())
         self.model.add(Dense(num_hidden_layer[0], input_shape=(input_width, num_features), activation='relu'))
         for i in range(1, len(num_hidden_layer)):
             self.model.add(Dense(num_hidden_layer[i], activation='sigmoid'))
         self.model.add(Dense(output_length))
+
+    def compile_model(self, optimizer, metrics):
+        input_test = Input(shape=(self.input_width, self.num_features))
+        self.model(input_test)
+        self.model.summary()
+
+        self.model.compile(optimizer=optimizer,
+                           loss=Huber(),
+                           metrics=metrics)
