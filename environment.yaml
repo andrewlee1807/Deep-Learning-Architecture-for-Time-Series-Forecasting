@@ -1,4 +1,4 @@
-name: gyeonggi_2955
+name: ts_model
 channels:
   - defaults
 dependencies:
@@ -170,4 +170,4 @@ dependencies:
     - y-py==0.5.5
     - ypy-websocket==0.8.2
     - zipp==3.13.0
-prefix: /home/andrew/anaconda3/envs/gyeonggi_2955
+prefix: /home/andrew/anaconda3/envs/ts_model

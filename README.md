@@ -1,16 +1,22 @@
 # Deep-Learning-Architecture-for-Time-Series-Forecasting
 
-# Initialized environment
+# Initialized environment (Linux OS)
 
 ```shell
-# using pip
-pip install -r environment.yml
 # using Conda
-conda create --name ts_model --file environment.yml
+conda env create -f environment.yaml  # Check the name of environment before import
 conda activate ts_model
-pip install -r requirements.txt
-```
+conda install -c conda-forge cudatoolkit=11.8.0
+pip install nvidia-cudnn-cu11==8.6.0.163
+CUDNN_PATH=$(dirname $(python -c "import nvidia.cudnn;print(nvidia.cudnn.__file__)"))
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$CONDA_PREFIX/lib/:$CUDNN_PATH/lib
+mkdir -p $CONDA_PREFIX/etc/conda/activate.d
+echo 'CUDNN_PATH=$(dirname $(python -c "import nvidia.cudnn;print(nvidia.cudnn.__file__)"))' >> $CONDA_PREFIX/etc/conda/activate.d/env_vars.sh
+echo 'export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$CONDA_PREFIX/lib/:$CUDNN_PATH/lib' >> $CONDA_PREFIX/etc/conda/activate.d/env_vars.sh
 
+```
+### Notice: 
+We are using TensorFlowV2.11 in order to use Keras-TCN library. So, there are some expected issues installation.
 ## Verify
 
 ```shell
@@ -34,14 +40,6 @@ Packing environment at 'C:\\Users\\Andrew\\anaconda3\\envs\\ts_model' to 'ts_mod
 tar -xzf ts_model.tar.gz
 source ts_model/bin/activate # Linux version
 ts_model\Scripts\activate.bat # Windows version
-```
-
-## Import environment
-
-```shell
-conda env create --file environment.yml # Check the name of environment before import
-
-
 ```
 
 # Docker build
