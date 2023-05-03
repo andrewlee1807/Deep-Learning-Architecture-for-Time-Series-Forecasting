@@ -70,6 +70,7 @@ class TimeSeriesGenerator:
         self.output_length = config['output_length']
         self.shift = shift
         self.shuffle = shuffle
+        self.scaler_engine = None  # This is for the normalization of the TRAIN dataset but apply to test and valid
 
         """
         The procedure of data preparation:
@@ -83,22 +84,22 @@ class TimeSeriesGenerator:
         4. Split train data into TRAIN and VALID
         5. Normalize data
         """
-
-        self.X_train, self.X_test = self.split_data(data, config['train_ratio'])  # [16752, X] -> [15076, X], [1676, X]
-
-        # ASSUME TRAIN AND TEST DATASET HAVE THE SAME DISTRIBUTION
-        self.scaler_engine = None  # This is for the normalization of the TRAIN dataset but apply to test and valid
-        if normalize_type is not None:
-            self.X_train, self.scaler_engine = self.normalize_dataset(self.X_train, standardization_type=normalize_type)
-            if self.X_test is not None:
-                self.X_test, _ = self.normalize_dataset(self.X_test, standardization_type=normalize_type,
-                                                        scaler=self.scaler_engine)
-
-        # Split train and valid dataset for TRAINING PROCESS. The distribution of train and valid dataset is the same.
-        self.X_train, self.X_valid = self.split_data(self.X_train, 0.9)
-        if normalize_type is not None:
-            self.X_valid, _ = self.normalize_dataset(self.X_valid, standardization_type=normalize_type,
-                                                     scaler=self.scaler_engine)
+        data_bk = data
+        data_gr = []
+        data_gr.append(data[:2900])
+        data_gr.append(data[2900:7500])
+        data_gr.append(data[7500:])
+        self.X_train = []
+        self.X_valid = []
+        self.X_test = []
+        for data in data_gr:
+            X_train, X_valid, X_test = self.split_norm_data(data, config['train_ratio'], normalize_type)
+            self.X_train = self.X_train + list(X_train)
+            self.X_valid = self.X_valid + list(X_valid)
+            self.X_test = self.X_test + list(X_test)
+        self.X_train = np.asarray(self.X_train)
+        self.X_valid = np.asarray(self.X_valid)
+        self.X_test = np.asarray(self.X_test)
 
         # (13568, X) -> [(13399, 168, X), (13399, 1, prediction_step)]
         self.data_train = self.build_tsd(self.X_train,
@@ -114,10 +115,33 @@ class TimeSeriesGenerator:
 
         # self.normalize_data()
 
-    def normalize_dataset(self, dataset, standardization_type, scaler=None):
+    def __split_2_set__(self, dataset, ratio):
+        X_test = None  # No testing, using whole data to train
+        X_train = dataset
+        if ratio is not None:
+            X_train, X_test = train_test_split(dataset, train_size=ratio, shuffle=self.shuffle)
+        return X_train, X_test
+
+    def split_norm_data(self, data, ratio, normalize_type=None):
+        X_train, X_test = self.__split_2_set__(data, ratio)  # [16752, X] -> [15076, X], [1676, X]
+
+        # ASSUME TRAIN AND TEST DATASET HAVE THE SAME DISTRIBUTION
+        if normalize_type is not None:
+            X_train = self.normalize_dataset(X_train,
+                                             standardization_type=normalize_type)
+            if X_test is not None:
+                X_test = self.normalize_dataset(X_test, standardization_type=normalize_type)
+
+        # Split train and valid dataset for TRAINING PROCESS. The distribution of train and valid dataset is the same.
+        X_train, X_valid = self.__split_2_set__(X_train, 0.9)
+        if normalize_type is not None:
+            X_valid = self.normalize_dataset(X_valid, standardization_type=normalize_type)
+
+        return X_train, X_valid, X_test
+
+    def normalize_dataset(self, dataset, standardization_type):
         """
 
-        :param scaler:
         :param dataset: [Number of records, Number of features]
         :param standardization_type:
         :return:
@@ -138,32 +162,13 @@ class TimeSeriesGenerator:
         standardization_method = standardization_methods[standardization_type]
 
         # There are some NaN values in the dataset, but the Normalization ignores them (not effectively results)
-        if scaler is None:
-            scaler = standardization_method()
+        if self.scaler_engine is None:
+            self.scaler_engine = standardization_method()
+            scaled_data = self.scaler_engine.fit_transform(dataset)
+        else:
+            scaled_data = self.scaler_engine.transform(dataset)
 
-        scaled_data = scaler.fit_transform(dataset)
-
-        return scaled_data, scaler
-
-    # def split_data(self, dataset, ratio):
-    #     X_test = None  # No testing, using whole data to train
-    #     X_train = self.raw_data
-    #     if ratio is not None:
-    #         X_train, X_test = train_test_split(
-    #             self.raw_data, train_size=ratio, shuffle=self.shuffle
-    #         )
-    #     X_train, X_valid = train_test_split(
-    #         X_train, train_size=0.9, shuffle=self.shuffle
-    #     )
-    #
-    #     return X_train, X_valid, X_test
-
-    def split_data(self, dataset, ratio):
-        X_test = None  # No testing, using whole data to train
-        X_train = dataset
-        if ratio is not None:
-            X_train, X_test = train_test_split(dataset, train_size=ratio, shuffle=self.shuffle)
-        return X_train, X_test
+        return scaled_data
 
     def inverse_scale_transform(self, y_predicted):
         """
@@ -189,48 +194,6 @@ class TimeSeriesGenerator:
                                       kernel_size=config['kernel_size'],
                                       gap=config['gap']),
                               self.data_test[1])
-
-    def normalize_data(self, standardization_type=1):
-        """The mean and standard deviation should only be computed using the training data so that the models
-        have no access to the values in the validation and test sets.
-        1: MinMaxScaler, 2: StandardScaler, 3: RobustScaler, 4: PowerTransformer
-        """
-        from sklearn.preprocessing import MinMaxScaler
-        from sklearn.preprocessing import PowerTransformer
-        from sklearn.preprocessing import RobustScaler
-        from sklearn.preprocessing import StandardScaler
-
-        standardization_methods = {
-            1: MinMaxScaler,
-            2: StandardScaler,
-            3: RobustScaler,
-            4: PowerTransformer,
-        }
-        standardization_method = standardization_methods[standardization_type]
-        scaler_x = standardization_method()
-        scaler_x.fit(self.data_train[0])
-        scaler_y = standardization_method()
-        scaler_y.fit(self.data_train[1])
-        self.scaler_x = scaler_x
-        self.scaler_y = scaler_y
-
-        self.data_train = (
-            scaler_x.transform(self.data_train[0]),
-            scaler_y.transform(self.data_train[1]),
-        )
-        # converting into L.S.T.M format
-        self.data_train = self.data_train[0][..., np.newaxis], self.data_train[1]
-        self.data_valid = (
-            scaler_x.transform(self.data_valid[0]),
-            scaler_y.transform(self.data_valid[1]),
-        )
-        self.data_valid = self.data_valid[0][..., np.newaxis], self.data_valid[1]
-        if self.data_test is not None:
-            self.data_test = (
-                scaler_x.transform(self.data_test[0]),
-                scaler_y.transform(self.data_test[1]),
-            )
-            self.data_test = self.data_test[0][..., np.newaxis], self.data_test[1]
 
     def build_tsd_test(self, data):
         """
