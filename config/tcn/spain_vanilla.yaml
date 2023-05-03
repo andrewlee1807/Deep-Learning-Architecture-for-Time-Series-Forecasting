@@ -6,6 +6,7 @@ input_width: 168
 output_length: 1 # predict 1 hour
 train_ratio: 0.9
 num_features: 1
-features: ['전력사용량']  # Features to use for training
+features: ['20']  # Hardcode
+prediction_feature: '20'
 optimizer: "adam"
 metrics: [ 'mse', 'mae' ]
