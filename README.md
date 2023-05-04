@@ -128,4 +128,14 @@ type requirements.txt | findstr /V /C:"@ file://" > requirements_filtered.txt
         2. TCN
         3. TCN-Deep
         4. ...
-   
+
+# How to run
+- Each `execute_*.sh` file is corresponding to each model
+  - Example: `execute_model1_cnu.sh` is corresponding to `model1` experiment on CNU dataset 
+    ```shell
+    sh execute_model1_cnu.sh 
+    ```
+- Set Linux Commands to Run in the Background Using disown:
+```shell
+tmux new -d 'sh execute_model2_spain.sh > output.log'
+```
