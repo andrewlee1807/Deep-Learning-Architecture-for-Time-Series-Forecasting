@@ -85,10 +85,10 @@ class TimeSeriesGenerator:
         5. Normalize data
         """
         data_bk = data
-        data_gr = []
-        data_gr.append(data[:2900])
-        data_gr.append(data[2900:7500])
-        data_gr.append(data[7500:])
+        data_gr = [data_bk]
+        # data_gr.append(data[:2900])
+        # data_gr.append(data[2900:7500])
+        # data_gr.append(data[7500:])
         self.X_train = []
         self.X_valid = []
         self.X_test = []
