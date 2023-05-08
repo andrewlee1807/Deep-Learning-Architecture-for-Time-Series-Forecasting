@@ -85,21 +85,18 @@ class TimeSeriesGenerator:
         5. Normalize data
         """
         data_bk = data
-        data_gr = []
-        # data_gr.append(data[:2900])
-        # data_gr.append(data[2900:7500])
-        # data_gr.append(data[7500:])
+        data_gr = [data[:2900], data[2900:7500], data[7500:]]
         self.X_train = []
         self.X_valid = []
         self.X_test = []
-        # for data in data_gr:
-        X_train, X_valid, X_test = self.split_norm_data(data, config['train_ratio'], normalize_type)
-        self.X_train = self.X_train + list(X_train)
-        self.X_valid = self.X_valid + list(X_valid)
-        self.X_test = self.X_test + list(X_test)
-        self.X_train = np.asarray(self.X_train)
-        self.X_valid = np.asarray(self.X_valid)
-        self.X_test = np.asarray(self.X_test)
+        for data in data_gr:
+            X_train, X_valid, X_test = self.split_norm_data(data, config['train_ratio'], normalize_type)
+            self.X_train = self.X_train + list(X_train)
+            self.X_valid = self.X_valid + list(X_valid)
+            self.X_test = self.X_test + list(X_test)
+            self.X_train = np.asarray(self.X_train)
+            self.X_valid = np.asarray(self.X_valid)
+            self.X_test = np.asarray(self.X_test)
 
         # (13568, X) -> [(13399, 168, X), (13399, 1, prediction_step)]
         self.data_train = self.build_tsd(self.X_train,
