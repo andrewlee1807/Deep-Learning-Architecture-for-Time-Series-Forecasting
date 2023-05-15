@@ -16,6 +16,8 @@ comed_str = "COMED"
 spain_str = "SPAIN"
 france_household_hour_str = "FRANCE_HOUSEHOLD_HOUR"
 gyeonggi_str = "GYEONGGI"
+gyeonggi9654_str = "GYEONGGI9654"
+gyeonggi6499_str = "GYEONGGI6499"
 gyeonggi2955_str = "GYEONGGI2955"
 
 # Dataset path
@@ -32,6 +34,8 @@ CONFIG_PATH = {
     spain_str: "https://raw.githubusercontent.com/andrewlee1807/Weights/main/datasets/spain/spain_ec_499.csv",
     france_household_hour_str: "https://raw.githubusercontent.com/andrewlee1807/Weights/main/datasets/france_household/france_household_hour_power_consumption.csv",
     gyeonggi_str: "https://raw.githubusercontent.com/andrewlee1807/Weights/main/datasets/gyeonggi_univariable/2955_1hour.csv",
+    gyeonggi9654_str: "https://raw.githubusercontent.com/andrewlee1807/Weights/main/datasets/gyeonggi_univariable/9654_1hour.csv",
+    gyeonggi6499_str: "https://raw.githubusercontent.com/andrewlee1807/Weights/main/datasets/gyeonggi_univariable/6499_1hour.csv",
     gyeonggi2955_str: "https://raw.githubusercontent.com/andrewlee1807/Weights/main/datasets/gyeonggi_multivariable/2955_1hour.csv"
 }
 
