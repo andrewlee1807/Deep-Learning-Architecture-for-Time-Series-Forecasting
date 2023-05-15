@@ -85,15 +85,15 @@ class TimeSeriesGenerator:
         5. Normalize data
         """
         data_bk = data
-        data_gr = [data[:2900], data[2900:7500], data[7500:]]
+        # data_gr = [data[:2900], data[2900:7500], data[7500:]]
         self.X_train = []
         self.X_valid = []
         self.X_test = []
-        for data in data_gr:
-            X_train, X_valid, X_test = self.split_norm_data(data, config['train_ratio'], normalize_type)
-            self.X_train = self.X_train + list(X_train)
-            self.X_valid = self.X_valid + list(X_valid)
-            self.X_test = self.X_test + list(X_test)
+        # for data in data_gr:
+        X_train, X_valid, X_test = self.split_norm_data(data, config['train_ratio'], normalize_type)
+        self.X_train = self.X_train + list(X_train)
+        self.X_valid = self.X_valid + list(X_valid)
+        self.X_test = self.X_test + list(X_test)
         self.X_train = np.asarray(self.X_train)
         self.X_valid = np.asarray(self.X_valid)
         self.X_test = np.asarray(self.X_test)
@@ -272,7 +272,9 @@ class Dataset:
             return FRANCEHOUSEHOLD()
 
         elif self.dataset_name == gyeonggi_str or \
-                self.dataset_name == gyeonggi2955_str:
+                self.dataset_name == gyeonggi2955_str or \
+                self.dataset_name == gyeonggi9654_str or \
+                self.dataset_name == gyeonggi6499_str:
             return GYEONGGI(data_name=self.dataset_name)
 
         elif self.dataset_name == spain_str:
