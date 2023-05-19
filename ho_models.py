@@ -1,4 +1,5 @@
 from delayedtcn.models import *
+from tcnbased.tcn_family import TCN_Vanilla
 from tensorflow.keras.losses import Huber
 from tensorflow.keras.layers import Input
 from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau, TensorBoard
@@ -27,7 +28,6 @@ class HOModel(kt.HyperModel):
                              max_value=24,
                              step=2)
         # nb_filters = hp.Choice('nb_filters', values=[8, 16, 32, 64])
-
 
         layer_stride1 = hp.Int('layer_stride1',
                                min_value=kernel_size // 2,
@@ -79,6 +79,51 @@ def initialize_model2(config):
     return HOModel(config=config, model_class=Model2)
 
 
+class HOTCNModel(kt.HyperModel):
+    def __init__(self, config, model_class):
+        self.output_length = config['output_length']
+        self.num_features = config['num_features']
+        self.input_width = config['input_width']
+        self.model_class = model_class
+
+    def build(self, hp):
+        kernel_size = hp.Choice('kernel_size', values=[2, 3, 5, 7])
+        nb_filters = hp.Choice('nb_filters', values=[16, 32, 64, 128])
+        use_skip_connections = hp.Choice(
+            'use_skip_connections', values=[True, False])
+
+        use_batch_norm = hp.Choice(
+            'use_batch_norm', values=[True, False])
+
+        def temp(x): return 2 ** x
+
+        def dilation_gen(x): return list(map(temp, range(x)))
+
+        dilations = hp.Choice('dilations', values=list(range(2, 8)))
+
+        model = TCN_Vanilla(input_width=self.input_width,
+                            dilations=dilation_gen(dilations),
+                            nb_filters=nb_filters,
+                            kernel_size=kernel_size,
+                            num_features=self.num_features,
+                            use_skip_connections=use_skip_connections,
+                            use_batch_norm=use_batch_norm,
+                            target_size=self.output_length)
+
+        input_test = Input(shape=(self.input_width, self.num_features))
+        model.summary(input_test)
+
+        model.compile(loss=Huber(),
+                      optimizer='adam',
+                      metrics=['mse', 'mae'])
+
+        return model
+
+
+def initialize_tcn_model(config):
+    return HOTCNModel(config=config, model_class=TCN_Vanilla)
+
+
 def get_model(model_name: str, config) -> object:
     model_name = model_name.upper()
     if model_name == model1_str.upper():
@@ -88,6 +133,6 @@ def get_model(model_name: str, config) -> object:
     elif model_name == model3_str.upper():
         pass
     elif model_name == tcn_model_str.upper():
-        pass
+        return initialize_tcn_model(config)
 
     return None

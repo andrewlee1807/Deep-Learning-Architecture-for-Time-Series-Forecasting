@@ -9,6 +9,7 @@ train_ratio: 0.9
 epochs: 50
 batch_size: 512
 features: [ "temperatures", "humidity", "pressure","energy" ]  # Features to use for training
+num_features: 4  # Number of features
 prediction_feature: "energy"  # Feature to use for prediction
 optimizer: "adam"
 metrics: [ 'mse', 'mae' ]
