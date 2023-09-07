@@ -63,7 +63,7 @@ def main():
 
     result_file = f'{os.path.join(args.output_dir, args.dataset_name)}_evaluation_result.txt'
     file = open(result_file, 'a')
-    file.write(f'{config["output_length"]} {result[1]} {result[2]}\n')
+    file.write(f'{config["output_length"]},{result[1]},{result[2]}\n')
     file.close()
 
     if args.write_log_file:

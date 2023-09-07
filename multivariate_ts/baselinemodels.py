@@ -3,7 +3,7 @@
 
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import LSTM, GRU, Dense, Flatten, Input
-from tensorflow.keras.losses import Huber
+from tensorflow.keras.losses import Huber, MeanSquaredError
 
 
 class Baseline:
@@ -20,7 +20,7 @@ class Baseline:
 
     def compile_model(self, optimizer, metrics):
         self.model.compile(optimizer=optimizer,
-                           loss=Huber(),
+                           loss=MeanSquaredError(),
                            metrics=metrics)
         self.model.summary()
 
@@ -45,9 +45,9 @@ class MLPModel(Baseline):
         self.input_width = input_width
         self.num_features = num_features
         self.model = Sequential()
-        self.model.add(Flatten())
-        self.model.add(Dense(num_hidden_layer[0], input_shape=(input_width, num_features), activation='relu'))
-        for i in range(1, len(num_hidden_layer)):
+        # Flatten the input data, as MLPs require a 1D input
+        self.model.add(Flatten(input_shape=(input_width, num_features)))
+        for i in range(0, len(num_hidden_layer)):
             self.model.add(Dense(num_hidden_layer[i], activation='sigmoid'))
         self.model.add(Dense(output_length))
 
