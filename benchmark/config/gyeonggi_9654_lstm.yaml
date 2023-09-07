@@ -1,0 +1,11 @@
+#INITIAL SETTINGS: FOR LSTM
+num_hidden_layer: [ 100, 100, 50]
+input_width: 168
+output_length: 1 # predict 1 hour
+train_ratio: 0.9
+epochs: 10
+batch_size: 512
+features: [ "Amount of Consumption" ]  # Features to use for training
+prediction_feature: "Amount of Consumption"  # Feature to use for prediction
+optimizer: "adam"
+metrics: [ 'mse', 'mae' ]
