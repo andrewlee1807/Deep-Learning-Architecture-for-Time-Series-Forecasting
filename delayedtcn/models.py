@@ -30,8 +30,8 @@ class StrideLayer(layers.Layer):
                                  dilation_rate=self.dilation_rate,
                                  strides=nb_stride,
                                  padding=padding,
-                                 name=name,
-                                 kernel_initializer=init)
+                                 name=name,)
+                                 # kernel_initializer=init)
 
             self.layers.append(conv)
 
@@ -122,6 +122,9 @@ class Model1(tf.keras.Model):
         init = tf.keras.initializers.RandomNormal(mean=0.0, stddev=0.01)
         assert padding in ['causal', 'same']
 
+        # Flatten the input data, as MLPs require a 1D input
+        self.flatten = layers.Flatten(input_shape=(None, 168))
+
         self.stride_blocks = []
 
         for i in range(len(self.list_stride)):
@@ -139,15 +142,18 @@ class Model1(tf.keras.Model):
 
         self.slicer_layer = layers.Lambda(lambda tt: tt[:, -1, :], name='Slice_Output')
 
+        self.dense1 = layers.Dense(units=128)
         self.dense = layers.Dense(units=target_size)
         # self.dense = layers.Dense(units=(2), activation='softmax')
         # self.reshape = layers.Reshape(target_shape=(1, 2))
 
     def call(self, inputs, training=True):
         x = inputs
+        x = self.flatten(x)
         for stride_block in self.stride_blocks:
             x = stride_block(x)
         x = self.slicer_layer(x)
+        x = self.dense1(x)
         x = self.dense(x)
         # x = self.reshape(x)
         return x
