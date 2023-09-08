@@ -77,6 +77,10 @@ latest: digest: sha256:2491e14b89ecebdd36b7042ff165d2a9a8ac1e2afbcb0afed7c183f03
 git update-index --assume-unchanged <file_path>
 ```
 
+```shell
+git update-index --no-assume-unchanged <file_path>
+```
+
 - Export package list only installed by `pip` in linux:
 ```shell
 pip freeze | grep -v "@ file://" > requirements.txt
