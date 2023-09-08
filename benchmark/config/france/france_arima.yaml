@@ -1,0 +1,4 @@
+#INITIAL SETTINGS
+train_ratio: 0.9
+features: [ "Global_active_power"]  # Features to use for training
+prediction_feature: "Global_active_power"  # Feature to use for prediction
