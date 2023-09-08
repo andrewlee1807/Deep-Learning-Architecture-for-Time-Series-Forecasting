@@ -4,7 +4,7 @@ from sklearn.model_selection import train_test_split
 
 import argparse
 from utils.data import Dataset
-from utils.logging import arg_parse, warming_up
+from utils.logging import arg_parse, warming_up, close_logging
 import multiprocessing
 from sklearn.preprocessing import MinMaxScaler
 import time
@@ -89,8 +89,19 @@ if __name__ == '__main__':
         mae = mean_absolute_error(actual, predicted)
         mse_values.append(mse)
         mae_values.append(mae)
-    print(f'MSE: {sum(mse_values) / len(mse_values)}')
-    print(f'MAE: {sum(mae_values) / len(mae_values)}')
+    result = (sum(mse_values) / len(mse_values), sum(mae_values) / len(mae_values))
+    print(f'MSE: {result[0]}')
+    print(f'MAE: {result[1]}')
+
+    import os
+
+    result_file = f'{os.path.join(args.output_dir, args.dataset_name)}_evaluation_result.txt'
+    file = open(result_file, 'a')
+    file.write(f'{config["output_length"]},{result[0]},{result[1]}\n')
+    file.close()
+
+    if args.write_log_file:
+        close_logging(config["file"], config["orig_stdout"])
     # mse = mean_squared_error(actual_values, predicted_values)
     # mae = mean_absolute_error(actual_values, predicted_values)
     # print(f'MSE: {mse}')
