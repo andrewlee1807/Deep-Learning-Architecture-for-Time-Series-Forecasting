@@ -1,0 +1,11 @@
+#INITIAL SETTINGS:
+num_hidden_layer: [ 512, 128, 64]
+input_width: 168
+output_length: 1 # predict 1 hour
+train_ratio: 0.9
+epochs: 15
+batch_size: 512
+features: ['Global_active_power']  # Features to use for training
+prediction_feature: 'Global_active_power'
+optimizer: "adam"
+metrics: [ 'mse', 'mae' ]
