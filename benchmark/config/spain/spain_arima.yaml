@@ -1,0 +1,4 @@
+#INITIAL SETTINGS
+train_ratio: 0.9
+features: [ "20"]  # Features to use for training
+prediction_feature: "20"  # Feature to use for prediction
