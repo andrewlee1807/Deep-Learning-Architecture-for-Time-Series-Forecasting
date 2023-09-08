@@ -9,7 +9,7 @@ for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 36 48 60
     --dataset_name="GYEONGGI9654" \
     --write_log_file=True \
     --model_name="arima" \
-    --config_path="benchmark/config/gyeonggi_9654_arima.yaml" \
+    --config_path="benchmark/config/gy/gyeonggi_9654_arima.yaml" \
     --output_length=$i \
     --device=0 \
     --output_dir="benchmark/exp/gy/arima"
