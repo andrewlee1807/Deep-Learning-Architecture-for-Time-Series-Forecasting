@@ -6,13 +6,13 @@
 for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 36 48 60 72 84 96 108 120 132 144; do
   echo "Starting to train model with output length = $i"
   python main.py \
-    --dataset_name="FRANCE_HOUSEHOLD_HOUR" \
+    --dataset_name="spain" \
     --write_log_file=True \
     --model_name="tcn" \
-    --config_path="benchmark/config/france/france_tcn.yaml" \
+    --config_path="benchmark/config/spain/spain_tcn.yaml" \
     --output_length=$i \
     --device=0 \
-    --output_dir="benchmark/exp/france/tcn"
+    --output_dir="benchmark/exp/spain/tcn"
   echo "Finished training model with output length = $i"
   echo "=================================================="
 done
