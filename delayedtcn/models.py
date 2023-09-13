@@ -123,7 +123,7 @@ class Model1(tf.keras.Model):
         assert padding in ['causal', 'same']
 
         # Flatten the input data, as MLPs require a 1D input
-        self.flatten = layers.Flatten(input_shape=(None, 168))
+        # self.flatten = layers.Flatten(input_shape=(None, 168))
 
         self.stride_blocks = []
 
@@ -149,7 +149,7 @@ class Model1(tf.keras.Model):
 
     def call(self, inputs, training=True):
         x = inputs
-        x = self.flatten(x)
+        # x = self.flatten(x)
         for stride_block in self.stride_blocks:
             x = stride_block(x)
         x = self.slicer_layer(x)
