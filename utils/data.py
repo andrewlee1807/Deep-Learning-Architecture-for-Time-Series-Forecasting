@@ -193,11 +193,11 @@ class TimeSeriesGenerator:
                                       gap=config['gap']),
                               self.data_test[1])
 
-        # saving data_train, data_valid, data_test as a numpy file to use in next time
-        saving_file_pkl(f'{config["output_dir"]}/{config["dataset_name"]}_data_train.pkl', self.data_train)
-        saving_file_pkl(f'{config["output_dir"]}/{config["dataset_name"]}_data_valid.pkl', self.data_valid)
-        if self.data_test is not None:
-            saving_file_pkl(f'{config["output_dir"]}/{config["dataset_name"]}_data_test.pkl', self.data_test)
+        # # saving data_train, data_valid, data_test as a numpy file to use in next time
+        # saving_file_pkl(f'{config["output_dir"]}/{config["dataset_name"]}_data_train.pkl', self.data_train)
+        # saving_file_pkl(f'{config["output_dir"]}/{config["dataset_name"]}_data_valid.pkl', self.data_valid)
+        # if self.data_test is not None:
+        #     saving_file_pkl(f'{config["output_dir"]}/{config["dataset_name"]}_data_test.pkl', self.data_test)
 
     def build_tsd_test(self, data):
         """

@@ -3,11 +3,9 @@
 #
 import os
 import argparse
-import numpy as np
 from models import get_model, build_callbacks
 from utils.data import Dataset, TimeSeriesGenerator
 from utils.logging import arg_parse, warming_up, close_logging
-from utils.directory import open_file_pkl
 
 
 def main():
@@ -23,37 +21,19 @@ def main():
     data_valid = None
     data_test = None
 
-    # check txt local files exist then load them and skip this steps
-    if "MODEL" in args.model_name.upper() and os.path.exists(
-            f'{config["output_dir"]}/{config["dataset_name"]}_data_train.pkl') and os.path.exists(
-        f'{config["output_dir"]}/{config["dataset_name"]}_data_valid.pkl'):  # delayNet model
-        print("Loading Train data...")
-        # load data from local files with numpy
-        data_train = open_file_pkl(f'{config["output_dir"]}/{config["dataset_name"]}_data_train.pkl')
-        print("Loading Valid data...")
-        # load data from local files with numpy
-        data_valid = open_file_pkl(f'{config["output_dir"]}/{config["dataset_name"]}_data_valid.pkl')
-        if os.path.exists(f'{config["output_dir"]}/{config["dataset_name"]}_data_test.pkl'):
-            print("Loading Test data...")
-            # load data from local files with numpy
-            data_test = open_file_pkl(f'{config["output_dir"]}/{config["dataset_name"]}_data_test.pkl')
-    else:
-        # data = dataset.dataloader.export_a_single_sequence()
-        data = dataset.dataloader.export_the_sequence(config["features"])
+    data = dataset.dataloader.export_the_sequence(config["features"])
 
-        # data = data[648:]
+    print("Building time series generator...")
+    tsf = TimeSeriesGenerator(data=data,
+                              config=config,
+                              normalize_type=1,
+                              shuffle=False)
 
-        print("Building time series generator...")
-        tsf = TimeSeriesGenerator(data=data,
-                                  config=config,
-                                  normalize_type=1,
-                                  shuffle=False)
-
-        if "MODEL" in args.model_name.upper():  # delayNet model
-            tsf.re_arrange_sequence(config)
-        data_train = tsf.data_train
-        data_valid = tsf.data_valid
-        data_test = tsf.data_test
+    if "MODEL" in args.model_name.upper():  # delayNet model
+        tsf.re_arrange_sequence(config)
+    data_train = tsf.data_train
+    data_valid = tsf.data_valid
+    data_test = tsf.data_test
 
     print("Building model...")
     # Get model (built and summary)
