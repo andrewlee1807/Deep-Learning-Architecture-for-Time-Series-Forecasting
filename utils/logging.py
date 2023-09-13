@@ -53,6 +53,7 @@ def warming_up(args):
         config = yaml.safe_load(file)
     config["output_length"] = args.output_length
     config["dataset_name"] = args.dataset_name
+    config["output_dir"] = args.output_dir
     config["tensorboard_log_dir"] = f'{args.output_dir}/tensorboard_log/{config["output_length"]}'
     if "epochs" not in config.keys():
         config["epochs"] = 100
