@@ -3,6 +3,7 @@
 
 from sklearn.model_selection import train_test_split
 import numpy as np
+from utils.directory import saving_file_pkl
 
 
 def pattern(datapack: np.array, kernel_size: int, gap=7):
@@ -191,6 +192,12 @@ class TimeSeriesGenerator:
                                       kernel_size=config['kernel_size'],
                                       gap=config['gap']),
                               self.data_test[1])
+
+        # saving data_train, data_valid, data_test as a numpy file to use in next time
+        saving_file_pkl(f'{config["output_dir"]}/{config["dataset_name"]}_data_train.pkl', self.data_train)
+        saving_file_pkl(f'{config["output_dir"]}/{config["dataset_name"]}_data_valid.pkl', self.data_valid)
+        if self.data_test is not None:
+            saving_file_pkl(f'{config["output_dir"]}/{config["dataset_name"]}_data_test.pkl', self.data_test)
 
     def build_tsd_test(self, data):
         """
