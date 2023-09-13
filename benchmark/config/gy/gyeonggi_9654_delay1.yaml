@@ -3,7 +3,7 @@ kernel_size: 12 # Sẽ là số chẳn vì kernal size này sẽ chia làm 2 ph�
 gap: 24       # Khoảng cách giữa 2 kết nối trong một kernal mask
 list_stride: [ 24, 1]  # Khả năng cao là giá trị đầu của list_stride = gap
 list_dilation: [ 1, 1] # gi trị này luôn bằng 1, vì không sử dụng đến dilation factor
-nb_filters: 64  # Số lượng filter trong mỗi kernal mask
+nb_filters: 16  # Số lượng filter trong mỗi kernal mask
 input_width: 168
 output_length: 1 # predict 1 hour
 train_ratio: 0.9
