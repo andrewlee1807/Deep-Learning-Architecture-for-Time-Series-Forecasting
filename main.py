@@ -16,10 +16,6 @@ def main():
 
     # Load dataset
     dataset = Dataset(dataset_name=config["dataset_name"])
-    # Train, Valid, Test variables
-    data_train = None
-    data_valid = None
-    data_test = None
 
     data = dataset.dataloader.export_the_sequence(config["features"])
 

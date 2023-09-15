@@ -3,34 +3,36 @@
 
 from sklearn.model_selection import train_test_split
 import numpy as np
-from utils.directory import saving_file_pkl
 
 
-def pattern(datapack: np.array, kernel_size: int, gap=7):
+def pattern(datapack: np.array, kernel_size: int, gap=7, delay_factor=1):
     # sequence.shape = [num_record, timeseries, feature] , example (1093, 24, 1)
-    head_kernel_size = tail_kernel_size = kernel_size // 2
 
     # Padding
-    padding = np.zeros((gap + tail_kernel_size, datapack.shape[-1]))  # [padding, feature]
+    padding = np.zeros((delay_factor * gap + delay_factor * kernel_size, datapack.shape[-1]))  # [padding, feature]
 
-    # padding = np.zeros(gap + tail_kernel_size)
+    def generate_kernel_order():
+        ixs = []
+        for d in range(0, delay_factor + 1):
+            for k in range(0, kernel_size):
+                ixs.append(gap * d + k)
+        return np.asarray(ixs)  # example: [0,1,2,5,6,7,10,11,12]
 
-    def generate_index(ix):
-        for i in range(0, head_kernel_size):  # gen index from head
-            list_ix.append(ix + i)
-        for j in range(0, tail_kernel_size):  # gen index from tail
-            list_ix.append(ix + gap + j)
+    kernel_order = generate_kernel_order()
 
-    # ix_padding = len(sequence) - (gap + tail_kernel_size)
+    def generate_index(seq_len):
+        idx = np.asarray([], dtype=np.int32)
+        for node_index in range(0, seq_len):
+            idx = np.concatenate((idx, kernel_order + node_index))
+        return idx
+
+    input_len = datapack.shape[1]  # get input length
+    index_sample = generate_index(input_len)
+
     new_datapack = []
-    # align sequence
     for time_pattern in datapack:
         new_sequence = np.concatenate([time_pattern, padding])
-        list_ix = []
-        for node_index in range(0, len(time_pattern)):
-            generate_index(node_index)
-        # new_sequence = new_sequence[list_ix]
-        new_datapack.append(new_sequence[list_ix])
+        new_datapack.append(new_sequence[index_sample])
 
     return np.asarray(new_datapack)
 
@@ -180,17 +182,20 @@ class TimeSeriesGenerator:
         """Arranges the input sequence to support Model1 training"""
         self.data_train = (pattern(datapack=self.data_train[0],
                                    kernel_size=config['kernel_size'],
-                                   gap=config['gap']),
+                                   gap=config['gap'],
+                                   delay_factor=config['delay_factor']),
                            self.data_train[1])
 
         self.data_valid = (pattern(datapack=self.data_valid[0],
                                    kernel_size=config['kernel_size'],
-                                   gap=config['gap']),
+                                   gap=config['gap'],
+                                   delay_factor=config['delay_factor']),
                            self.data_valid[1])
         if self.data_test is not None:
             self.data_test = (pattern(datapack=self.data_test[0],
                                       kernel_size=config['kernel_size'],
-                                      gap=config['gap']),
+                                      gap=config['gap'],
+                                      delay_factor=config['delay_factor']),
                               self.data_test[1])
 
         # # saving data_train, data_valid, data_test as a numpy file to use in next time

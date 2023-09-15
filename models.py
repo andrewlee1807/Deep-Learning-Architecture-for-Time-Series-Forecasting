@@ -49,6 +49,8 @@ def compile_model(model, config):
 
 
 def initialize_model1(config):
+    config['list_stride'] = [config['kernel_size'] * config['delay_factor'], 1]
+    config['list_dilation'] = [1, 1]
     model = Model1(list_stride=config['list_stride'],
                    list_dilation=config['list_dilation'],
                    nb_filters=config['nb_filters'],
