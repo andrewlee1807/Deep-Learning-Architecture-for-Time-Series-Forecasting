@@ -1,8 +1,8 @@
 #  Copyright (c) 2022 Andrew
 #  Email: andrewlee1807@gmail.com
 
-from sklearn.model_selection import train_test_split
 import numpy as np
+from sklearn.model_selection import train_test_split
 
 
 def pattern(datapack: np.array, kernel_size: int, gap=7, delay_factor=1):
@@ -113,7 +113,9 @@ class TimeSeriesGenerator:
         else:
             self.data_test = None
 
-        # self.normalize_data()
+        self.data_train_gen = None
+        self.data_valid_gen = None
+        self.data_test_gen = None
 
     def __split_2_set__(self, dataset, ratio):
         X_test = None  # No testing, using whole data to train
@@ -180,24 +182,24 @@ class TimeSeriesGenerator:
 
     def re_arrange_sequence(self, config):
         """Arranges the input sequence to support Model1 training"""
-        self.data_train = (pattern(datapack=self.data_train[0],
-                                   kernel_size=config['kernel_size'],
-                                   gap=config['gap'],
-                                   delay_factor=config['delay_factor']),
-                           self.data_train[1])
+        self.data_train_gen = (pattern(datapack=self.data_train[0],
+                                       kernel_size=config['kernel_size'],
+                                       gap=config['gap'],
+                                       delay_factor=config['delay_factor']),
+                               self.data_train[1])
 
-        self.data_valid = (pattern(datapack=self.data_valid[0],
-                                   kernel_size=config['kernel_size'],
-                                   gap=config['gap'],
-                                   delay_factor=config['delay_factor']),
-                           self.data_valid[1])
+        self.data_valid_gen = (pattern(datapack=self.data_valid[0],
+                                       kernel_size=config['kernel_size'],
+                                       gap=config['gap'],
+                                       delay_factor=config['delay_factor']),
+                               self.data_valid[1])
         if self.data_test is not None:
-            self.data_test = (pattern(datapack=self.data_test[0],
-                                      kernel_size=config['kernel_size'],
-                                      gap=config['gap'],
-                                      delay_factor=config['delay_factor']),
-                              self.data_test[1])
-
+            self.data_test_gen = (pattern(datapack=self.data_test[0],
+                                          kernel_size=config['kernel_size'],
+                                          gap=config['gap'],
+                                          delay_factor=config['delay_factor']),
+                                  self.data_test[1])
+        config['input_width'] = self.data_train_gen[0].shape[1]
         # # saving data_train, data_valid, data_test as a numpy file to use in next time
         # saving_file_pkl(f'{config["output_dir"]}/{config["dataset_name"]}_data_train.pkl', self.data_train)
         # saving_file_pkl(f'{config["output_dir"]}/{config["dataset_name"]}_data_valid.pkl', self.data_valid)
