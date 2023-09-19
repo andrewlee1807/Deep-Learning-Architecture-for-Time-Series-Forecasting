@@ -1,0 +1,9 @@
+#INITIAL SETTINGS
+max_trials: 10
+input_width: 168
+train_ratio: 0.9
+epochs: 10
+features: ['Global_active_power']  # Features to use for training
+prediction_feature: 'Global_active_power'
+optimizer: "adam"
+metrics: [ 'mse', 'mae' ]
