@@ -1,8 +1,8 @@
-from delayedtcn.models import *
-from tensorflow.keras.losses import Huber
-from tensorflow.keras.layers import Input
 from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau, TensorBoard
+from tensorflow.keras.layers import Input
+from tensorflow.keras.losses import Huber
 
+from delayedtcn.models import *
 from multivariate_ts.baselinemodels import LSTMModel, GRUModel, MLPModel
 
 # List model name
@@ -37,7 +37,10 @@ def build_callbacks(tensorboard_log_dir='logs', tensorboard_name=None):
 
 def compile_model(model, config):
     # print model
-    input_test = Input(shape=(config['input_width'], len(config['features'])))
+    # input_test = [input_len (after generating), features]
+    input_test1 = Input(shape=(168, len(config['features'])))
+    input_test2 = Input(shape=(config['input_width'], len(config['features'])))
+    input_test = [input_test1, input_test2]
     # model.build(input_test)
     model.summary(input_test)
     # Build model
@@ -49,12 +52,13 @@ def compile_model(model, config):
 
 
 def initialize_model1(config):
-    config['list_stride'] = [config['kernel_size'] * config['delay_factor'], 1]
+    config['list_stride'] = [config['kernel_size'] * (config['delay_factor'] + 1), 1]
     config['list_dilation'] = [1, 1]
     model = Model1(list_stride=config['list_stride'],
                    list_dilation=config['list_dilation'],
                    nb_filters=config['nb_filters'],
                    kernel_size=config['kernel_size'],
+                   nb_stacks=config['nb_stacks'],
                    target_size=config['output_length'])
 
     return compile_model(model, config)

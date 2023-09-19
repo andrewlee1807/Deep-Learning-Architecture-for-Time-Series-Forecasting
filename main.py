@@ -1,8 +1,9 @@
 #  Copyright (c) 2022-2022 Andrew
 #  Email: andrewlee1807@gmail.com
 #
-import os
 import argparse
+import os
+
 from models import get_model, build_callbacks
 from utils.data import Dataset, TimeSeriesGenerator
 from utils.logging import arg_parse, warming_up, close_logging
@@ -27,9 +28,9 @@ def main():
 
     if "MODEL" in args.model_name.upper():  # delayNet model
         tsf.re_arrange_sequence(config)
-    data_train = tsf.data_train
-    data_valid = tsf.data_valid
-    data_test = tsf.data_test
+    data_train = [[tsf.data_train[0], tsf.data_train_gen[0]], tsf.data_train[1]]
+    data_valid = [[tsf.data_valid[0], tsf.data_valid_gen[0]], tsf.data_valid[1]]
+    data_test = [[tsf.data_test[0], tsf.data_test_gen[0]], tsf.data_test[1]]
 
     print("Building model...")
     # Get model (built and summary)
