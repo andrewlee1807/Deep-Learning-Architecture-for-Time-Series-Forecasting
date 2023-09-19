@@ -28,9 +28,13 @@ def main():
 
     if "MODEL" in args.model_name.upper():  # delayNet model
         tsf.re_arrange_sequence(config)
-    data_train = [[tsf.data_train[0], tsf.data_train_gen[0]], tsf.data_train[1]]
-    data_valid = [[tsf.data_valid[0], tsf.data_valid_gen[0]], tsf.data_valid[1]]
-    data_test = [[tsf.data_test[0], tsf.data_test_gen[0]], tsf.data_test[1]]
+        data_train = [[tsf.data_train[0], tsf.data_train_gen[0]], tsf.data_train[1]]
+        data_valid = [[tsf.data_valid[0], tsf.data_valid_gen[0]], tsf.data_valid[1]]
+        data_test = [[tsf.data_test[0], tsf.data_test_gen[0]], tsf.data_test[1]]
+    else:
+        data_train = [tsf.data_train[0], tsf.data_train[1]]
+        data_valid = [tsf.data_valid[0], tsf.data_valid[1]]
+        data_test = [tsf.data_test[0], tsf.data_test[1]]
 
     print("Building model...")
     # Get model (built and summary)
