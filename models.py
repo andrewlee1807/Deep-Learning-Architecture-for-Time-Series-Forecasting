@@ -39,8 +39,11 @@ def compile_model(model, config):
     # print model
     # input_test = [input_len (after generating), features]
     input_test1 = Input(shape=(168, len(config['features'])))
-    input_test2 = Input(shape=(config['input_width'], len(config['features'])))
-    input_test = [input_test1, input_test2]
+    if isinstance(model, Model1):
+        input_test2 = Input(shape=(config['input_width'], len(config['features'])))
+        input_test = [input_test1, input_test2]
+    else:
+        input_test = input_test1
     # model.build(input_test)
     model.summary(input_test)
     # Build model
