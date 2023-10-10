@@ -60,7 +60,7 @@ def initialize_model1(config):
     model = Model1(list_stride=config['list_stride'],
                    list_dilation=config['list_dilation'],
                    nb_filters=config['nb_filters'],
-                   kernel_size=config['kernel_size'],
+                   kernel_size=config['kernel_size'] * config['delay_factor'],
                    nb_stacks=config['nb_stacks'],
                    target_size=config['output_length'])
 
